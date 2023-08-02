@@ -84,10 +84,26 @@ h6 {
 }
 
 .bookNow {
-  width: 270px;
+  width: 250px;
   height: auto;
   border-radius: 10px;
   background-color: turquoise;
   justify-content: center;
   margin-bottom: 48px;
+  opacity: 90%;
+}
+
+.bookNow a {
+  display: block;
+  color: black;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: double;
+  font-size: 15px;
+  text-decoration: none;
+}
+
+.bookNow a.hover {
+  background-color: white;
+  color: black;
 }
