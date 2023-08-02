@@ -1,6 +1,6 @@
 /* For background cover */
 body {
-  background-image: url("bg_1.jpeg");
+  background-image: url("bg_2.jpeg");
   height: 100%;
   background-repeat: no-repeat;
   background-position: top;
@@ -56,7 +56,7 @@ h1 {
   text-align: center;
 }
 
-h2 {
+#toplogo {
   text-align: center;
   font-weight: bold;
 }
@@ -68,13 +68,32 @@ h6 {
   text-align: end;
 }
 
-.content {
+/* .content {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  align-items: center;
-  height: 550px;
-  /* border-radius: 10 px; */
-  /* background-color: white; */
-  /* opacity: 50%; */
+  align-items: ;
+  height: 600px;
+  border-radius: 10 px;
+  background-color: white;
+  opacity: 50%;
+} */
+.contentbox {
+  width: 550px;
+  height: 400px;
+  background-color: white;
+  border-radius: 20px;
+  margin: 30px;
+  opacity: 75%;
+}
+#contentslogan {
+  text-align: left;
+  margin-left: 30px;
+  font-weight: bolder;
+  font-size: xx-large;
+}
+#contentsmall {
+  text-align: left;
+  margin-left: 20px;
+  font-size: large;
 }
