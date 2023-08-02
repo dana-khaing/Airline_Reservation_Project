@@ -1,6 +1,6 @@
 /* For background cover */
 body {
-  background-image: url("04371312-1EAE-47EF-99C8-F378CF244EB9_1_201_a.jpeg");
+  background-image: url("bg_1.jpeg");
   height: 100%;
   background-repeat: no-repeat;
   background-position: top;
@@ -43,6 +43,7 @@ body {
 b.active {
   background-color: turquoise;
   color: white;
+  text-decoration: none;
 }
 
 .topnav a,
