@@ -78,32 +78,3 @@ h6 {
   /* background-color: white; */
   /* opacity: 50%; */
 }
-
-.slogan {
-  width: 100%;
-}
-
-.bookNow {
-  width: 250px;
-  height: auto;
-  border-radius: 10px;
-  background-color: #369de9;
-  justify-content: center;
-  margin-bottom: 48px;
-  opacity: 90%;
-}
-
-.bookNow a {
-  display: block;
-  color: white;
-  text-align: center;
-  padding: 14px 16px;
-  text-decoration: double;
-  font-size: 15px;
-  text-decoration: none;
-}
-
-.bookNow a.hover {
-  background-color: white;
-  color: black;
-}
