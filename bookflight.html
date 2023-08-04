@@ -21,7 +21,60 @@
     <br />
     <span id="contentslogan">PACK YOUR BAG!!!</span>
     <span id="contentsmall">There is so much to see.</span>
-    <div class="contentbox"></div>
+    <div class="contentbox">
+      <div class="radio_style">
+        <span>
+          <h5>
+            <input type="radio" name="triptype" value="one_way" /> One Way
+          </h5>
+        </span>
+        <span>
+          <h5>
+            <input type="radio" name="triptype" value="roundtrip" /> Round Trip
+          </h5>
+        </span>
+      </div>
+      <div class="choice_time">
+        <h5 id="con_align">Flying From :</h5>
+        <select name="departure_teminal" required>
+          <option value="" disabled selected hidden>Departure Terminal</option>
+          <option value="YGN">Yagon International Airport</option>
+          <option value="LNH">London Heatthrow</option>
+          <option value="Thai">Thai international Airport</option>
+        </select>
+      </div>
+      <div class="choice_time">
+        <h5 id="con_align">Flying To : <br /></h5>
+        <select name="arrival_teminal" required>
+          <option value="" disabled selected hidden>Arrival Terminal</option>
+          <option value="YGN">Yagon International Airport</option>
+          <option value="LNH">London Heatthrow</option>
+          <option value="Thai">Thai international Airport</option>
+        </select>
+      </div>
+      <div class="choice_date">
+        <span id="label_date"><h5>Departure Date :</h5></span>
+        <span id="date"><input type="date" name="departure_date" /></span>
+      </div>
+      <div class="choice_date">
+        <span id="label_date_2"><h5>Arrival Date :</h5></span>
+        <span id="date_2"><input type="date" name="departure_date" /></span>
+      </div>
+      <div class="choice_seat">
+        <span id="label_for_seat"><h5>Number of seat :</h5></span>
+        <span id="option"
+          ><input
+            type="number"
+            name="no_of_seat"
+            min="1"
+            max="10"
+            placeholder="0"
+        /></span>
+      </div>
+      <div id="search_flight">
+        <button>Search Your Flight</button>
+      </div>
+    </div>
   </body>
   <footer>
     <h6>powered by albert enterprose.</h6>

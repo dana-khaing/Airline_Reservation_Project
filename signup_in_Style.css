@@ -178,3 +178,14 @@ h6 {
   background-color: white;
   opacity: 95%;
 }
+button {
+  color: white;
+  border-radius: 10px;
+  background-color: #2a9df1;
+  width: 100px;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: double;
+  font-size: 15px;
+  cursor: pointer;
+}

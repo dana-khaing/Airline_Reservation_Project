@@ -18,6 +18,7 @@ body {
   width: auto;
   border-radius: 10px;
   background-color: #2a9df1;
+  color: white;
 }
 .topnav a {
   float: right;

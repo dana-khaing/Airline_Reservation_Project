@@ -18,6 +18,7 @@ body {
   width: auto;
   border-radius: 10px;
   background-color: #2a9df1;
+  color: white;
 }
 .topnav a {
   float: right;
@@ -123,7 +124,7 @@ h6 {
   margin: 0;
 }
 
-.content userdetail {
+.content .userdetail {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -149,4 +150,15 @@ h6 {
   border: 300px;
   font-size: large;
   border-radius: 10px;
+}
+button {
+  color: white;
+  border-radius: 10px;
+  background-color: #2a9df1;
+  width: 100px;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: double;
+  font-size: 15px;
+  cursor: pointer;
 }
