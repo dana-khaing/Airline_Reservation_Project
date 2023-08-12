@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ALBERT AIRLINE</title>
+    <link rel="stylesheet" href="mainpage.css" />
+  </head>
+  <body>
+    <div class="bg_img"></div>
+    <h2 id="toplogo">
+      ALBERT <br />
+      ENTERPRISE
+    </h2>
+    <div class="topnav">
+      <b>ALBERT AIRLINE</b>
+      <a class="login" href="login_page.html">Log in</a>
+      <a class="active" href="#About">About</a>
+      <a class="active" href="#ContactUs">Contact Us</a>
+      <a class="active" href="Frontpage.html">Home</a>
+    </div>
+    <div class="bottomnav">
+      <p>Departure :</p>
+      <div class="refer_info">
+        <select name="departure_teminal" required>
+          <option value="" disabled selected hidden>Departure Terminal</option>
+          <option value="YGN">Yagon International Airport</option>
+          <option value="LNH">London Heatthrow</option>
+          <option value="Thai">Thai international Airport</option>
+        </select>
+      </div>
+      <p>Arrival :</p>
+      <div class="refer_info">
+        <select name="arrival_teminal" required>
+          <option value="" disabled selected hidden>Arrival Terminal</option>
+          <option value="YGN">Yagon International Airport</option>
+          <option value="LNH">London Heatthrow</option>
+          <option value="Thai">Thai international Airport</option>
+        </select>
+      </div>
+      <p>Departure date :</p>
+      <div class="refer_info">
+        <input type="date" name="departure_date" />
+      </div>
+      <p>Arrival date :</p>
+      <div class="refer_info">
+        <input type="date" name="departure_date" />
+      </div>
+      <p>No. of seat:</p>
+      <div class="refer_info">
+        <input
+          type="number"
+          name="no_of_seat"
+          min="1"
+          max="10"
+          placeholder="0"
+        />
+      </div>
+      <div id="search_flight">
+        <button>Search</button>
+      </div>
+    </div>
+
+    <div id="allmidnav">
+      <div id="firstnav">
+        <h3>Filter By</h3>
+        <h4>Transits</h4>
+        <form action="choice_direction">
+          <input type="checkbox" name="choice_1" value="direct" />
+          <label for="choice_1">Direct</label> <br /><br />
+          <input type="checkbox" name="choice_2" value="one_stop" />
+          <label for="choice_2">1 Stop</label><br /><br />
+          <input type="checkbox" name="choice_3" value="more_stop" />
+          <label for="choice_3">2 and more Stops</label><br /><br />
+        </form>
+        <h4>Airlines</h4>
+        <form action="choice_airline">
+          <input type="checkbox" name="plane_1" value="albert" />
+          <label for="plane_1">Albert Airline</label><br /><br />
+          <input type="checkbox" name="plane_2" value="kbz" />
+          <label for="plane_2">KBZ International Airline</label><br /><br />
+          <input type="checkbox" name="plane_3" value="mai" />
+          <label for="plane_3">MAI International Airline</label><br /><br />
+          <input type="checkbox" name="plane_4" value="thaiairway" />
+          <label for="plane_3">Thai Airway</label>
+        </form>
+      </div>
+      <div id="secnav">
+        <h3>Cheapest Flight</h3>
+        <!-- start of tje flight box -->
+        <div class="flightbox">
+          <div class="time_fee">
+            <div class="dis_time">21:25(LHR) - 18:00(RGN)</div>
+            <div class="dis_money">$1217</div>
+          </div>
+          <div class="detail">
+            <span>1 Connection</span>
+            <span>Economy</span>
+            <span>Albert Airline</span>
+          </div>
+          <div class="time_fee">
+            <div class="dis_time">19:00(RGN) - 07:50(LHR)</div>
+            <div class="dis_money"></div>
+          </div>
+          <div class="detail">
+            <span>1 Connection</span>
+            <span>Economy</span>
+            <span>Albert Airline</span>
+          </div>
+        </div>
+        <!-- end of the flight box -->
+        <h3>Recommanded for You</h3>
+        <!-- start of tje flight box -->
+        <div class="flightbox">
+          <div class="time_fee">
+            <div class="dis_time">21:25(LHR) - 18:00(RGN)</div>
+            <div class="dis_money">$1217</div>
+          </div>
+          <div class="detail">
+            <span>1 Connection</span>
+            <span>Economy</span>
+            <span>Albert Airline</span>
+          </div>
+          <div class="time_fee">
+            <div class="dis_time">19:00(RGN) - 07:50(LHR)</div>
+            <div class="dis_money"></div>
+          </div>
+          <div class="detail">
+            <span>1 Connection</span>
+            <span>Economy</span>
+            <span>Albert Airline</span>
+          </div>
+        </div>
+        <!-- end of the flight box -->
+        <!-- start of tje flight box -->
+        <div class="flightbox">
+          <div class="time_fee">
+            <div class="dis_time">21:25(LHR) - 18:00(RGN)</div>
+            <div class="dis_money">$1217</div>
+          </div>
+          <div class="detail">
+            <span>1 Connection</span>
+            <span>Economy</span>
+            <span>Albert Airline</span>
+          </div>
+          <div class="time_fee">
+            <div class="dis_time">19:00(RGN) - 07:50(LHR)</div>
+            <div class="dis_money"></div>
+          </div>
+          <div class="detail">
+            <span>1 Connection</span>
+            <span>Economy</span>
+            <span>Albert Airline</span>
+          </div>
+        </div>
+        <!-- end of the flight box --><!-- start of tje flight box -->
+        <div class="flightbox">
+          <div class="time_fee">
+            <div class="dis_time">21:25(LHR) - 18:00(RGN)</div>
+            <div class="dis_money">$1217</div>
+          </div>
+          <div class="detail">
+            <span>1 Connection</span>
+            <span>Economy</span>
+            <span>Albert Airline</span>
+          </div>
+          <div class="time_fee">
+            <div class="dis_time">19:00(RGN) - 07:50(LHR)</div>
+            <div class="dis_money"></div>
+          </div>
+          <div class="detail">
+            <span>1 Connection</span>
+            <span>Economy</span>
+            <span>Albert Airline</span>
+          </div>
+        </div>
+        <!-- end of the flight box -->
+      </div>
+
+      <div id="thirdnav"></div>
+    </div>
+    <br />
+  </body>
+  <footer>
+    <h6>powered by albert enterprise.</h6>
+  </footer>
+</html>
