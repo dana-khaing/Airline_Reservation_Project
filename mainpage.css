@@ -128,24 +128,30 @@ footer {
   border-radius: 10px;
   padding: 10px;
   margin-right: 10px;
+  overflow: scroll;
+  height: 700px;
 }
 
 #secnav {
-  width: 500px;
+  width: 570px;
   background-color: white;
   opacity: 75%;
   border-radius: 10px;
   padding: 10px;
-  height: auto;
+  height: 700px;
+  overflow-y: scroll;
 }
 
 #thirdnav {
   width: 700px;
   background-color: white;
   border-radius: 10px;
-  padding: 10px;
+  padding: 30px;
   margin-left: 10px;
   opacity: 75%;
+  font-family: "verdana";
+  overflow: scroll;
+  height: 660px;
 }
 .flightbox {
   width: 480px;
@@ -175,9 +181,40 @@ footer {
   font-weight: bold;
   font-size: x-large;
   color: green;
+  text-align: end;
 }
 .detail {
   display: flex;
   flex-direction: row;
   justify-content: space-around;
+}
+
+#seat_position {
+  display: grid;
+  grid-template-rows: auto auto;
+  grid-template-columns: auto auto auto auto auto auto auto auto auto auto auto auto auto;
+  row-gap: 3px;
+  column-gap: 3px;
+  padding: 20px;
+}
+
+.seat {
+  border: 1px solid black;
+  border-radius: 10px;
+  background-color: wheat;
+  width: 45px;
+  height: 45px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#buttoncontainer {
+  display: flex;
+  justify-content: center;
+}
+
+#bookbutton {
+  border: 2px solid black;
+  width: 400px;
 }
