@@ -189,11 +189,3 @@ button {
   font-size: 15px;
   cursor: pointer;
 }
-.seat {
-  border: 1px;
-  border-radius: 10px;
-  border-color: white;
-  background-color: aqua;
-  width: 100px;
-  height: 100px;
-}
