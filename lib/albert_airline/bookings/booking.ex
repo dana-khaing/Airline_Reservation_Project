@@ -1,0 +1,38 @@
+defmodule AlbertAirline.Bookings.Booking do
+  use Ecto.Schema
+  import Ecto.Changeset
+
+  @statuses ~w(confirmed cancelled)
+
+  schema "bookings" do
+    field :status, :string, default: "confirmed"
+    field :total_price, :decimal
+    field :confirmation_code, :string
+    field :booked_at, :utc_datetime
+
+    belongs_to :seat, AlbertAirline.Flights.Seat
+    belongs_to :flight, AlbertAirline.Flights.Flight
+
+    timestamps(type: :utc_datetime)
+  end
+
+  @doc false
+  def changeset(booking, attrs) do
+    booking
+    |> cast(attrs, [:status, :total_price, :confirmation_code, :booked_at, :seat_id, :flight_id])
+    |> validate_required([
+      :status,
+      :total_price,
+      :confirmation_code,
+      :booked_at,
+      :seat_id,
+      :flight_id
+    ])
+    |> validate_inclusion(:status, @statuses)
+    |> validate_number(:total_price, greater_than: 0)
+    |> unique_constraint(:confirmation_code)
+    |> unique_constraint(:seat_id, name: :bookings_active_seat_id_index)
+    |> foreign_key_constraint(:seat_id)
+    |> foreign_key_constraint(:flight_id)
+  end
+end
