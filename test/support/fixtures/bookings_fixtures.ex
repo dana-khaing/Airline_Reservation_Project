@@ -5,6 +5,7 @@ defmodule AlbertAirline.BookingsFixtures do
   """
 
   import AlbertAirline.FlightsFixtures
+  import AlbertAirline.AccountsFixtures
 
   @doc """
   Generate a unique booking confirmation_code.
@@ -20,6 +21,7 @@ defmodule AlbertAirline.BookingsFixtures do
       |> Enum.into(%{})
       |> Map.put_new_lazy(:seat_id, fn -> seat_fixture().id end)
       |> Map.put_new_lazy(:flight_id, fn -> flight_fixture().id end)
+      |> Map.put_new_lazy(:user_id, fn -> user_fixture().id end)
 
     {:ok, booking} =
       attrs
