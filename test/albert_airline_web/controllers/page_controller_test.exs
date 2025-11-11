@@ -16,16 +16,6 @@ defmodule AlbertAirlineWeb.PageControllerTest do
     assert html_response(conn, 200) =~ "Connect with Us"
   end
 
-  test "GET /login renders a placeholder page", %{conn: conn} do
-    conn = get(conn, ~p"/login")
-    assert html_response(conn, 200) =~ "Log in"
-  end
-
-  test "GET /signup renders a placeholder page", %{conn: conn} do
-    conn = get(conn, ~p"/signup")
-    assert html_response(conn, 200) =~ "Sign up"
-  end
-
   test "GET /search renders a placeholder page", %{conn: conn} do
     conn = get(conn, ~p"/search")
     assert html_response(conn, 200) =~ "Flight Search"

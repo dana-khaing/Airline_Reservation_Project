@@ -43,7 +43,18 @@ defmodule AlbertAirlineWeb.Layouts do
             <.nav_link href="/about">About</.nav_link>
             <.nav_link href="/contact">Contact Us</.nav_link>
             <.nav_link href="/">Home</.nav_link>
-            <.nav_link href="/login">Log in</.nav_link>
+            <%= if @current_scope && @current_scope.user do %>
+              <.nav_link href="/users/settings">{@current_scope.user.email}</.nav_link>
+              <.link
+                href="/users/log-out"
+                method="delete"
+                class="rounded-lg bg-[#2a9df1] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
+              >
+                Log out
+              </.link>
+            <% else %>
+              <.nav_link href="/users/log-in">Log in</.nav_link>
+            <% end %>
           </div>
         </nav>
       </div>
