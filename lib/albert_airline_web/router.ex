@@ -23,7 +23,6 @@ defmodule AlbertAirlineWeb.Router do
     get "/", PageController, :home
     get "/about", PageController, :about
     get "/contact", PageController, :contact
-    get "/search", PageController, :search
   end
 
   # Other scopes may use custom stacks.
@@ -70,6 +69,8 @@ defmodule AlbertAirlineWeb.Router do
       live "/users/register", UserLive.Registration, :new
       live "/users/log-in", UserLive.Login, :new
       live "/users/log-in/:token", UserLive.Confirmation, :new
+      live "/search", FlightLive.Search, :index
+      live "/flights/:id", FlightLive.Show, :show
     end
 
     post "/users/log-in", UserSessionController, :create

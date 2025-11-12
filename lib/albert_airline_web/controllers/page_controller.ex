@@ -12,11 +12,4 @@ defmodule AlbertAirlineWeb.PageController do
   def contact(conn, _params) do
     render(conn, :contact)
   end
-
-  def search(conn, _params) do
-    render(conn, :coming_soon,
-      title: "Flight Search",
-      message: "Flight search is being built next — check back soon."
-    )
-  end
 end
