@@ -310,6 +310,13 @@ defmodule AlbertAirline.Flights do
   end
 
   @doc """
+  Returns all seats for a flight, ordered for grid display (row, then column).
+  """
+  def list_seats_for_flight(flight_id) do
+    Repo.all(from(s in Seat, where: s.flight_id == ^flight_id, order_by: [asc: s.id]))
+  end
+
+  @doc """
   Gets a single seat.
 
   Raises `Ecto.NoResultsError` if the Seat does not exist.
@@ -359,6 +366,7 @@ defmodule AlbertAirline.Flights do
     seat
     |> Seat.changeset(attrs)
     |> Repo.update()
+    |> broadcast_seat_change()
   end
 
   @doc """
@@ -492,4 +500,27 @@ defmodule AlbertAirline.Flights do
       :count
     )
   end
+
+  @doc """
+  Subscribes the calling process to live seat-status updates for a flight.
+  Broadcasts a `{:seat_updated, seat}` message whenever any seat on this
+  flight changes (e.g. a booking claims it, or a cancellation frees it up).
+  """
+  def subscribe_to_seats(flight_id) do
+    Phoenix.PubSub.subscribe(AlbertAirline.PubSub, seat_topic(flight_id))
+  end
+
+  defp seat_topic(flight_id), do: "flight:#{flight_id}:seats"
+
+  defp broadcast_seat_change({:ok, %Seat{} = seat} = result) do
+    Phoenix.PubSub.broadcast(
+      AlbertAirline.PubSub,
+      seat_topic(seat.flight_id),
+      {:seat_updated, seat}
+    )
+
+    result
+  end
+
+  defp broadcast_seat_change(result), do: result
 end
