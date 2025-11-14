@@ -1,6 +1,7 @@
 defmodule AlbertAirlineWeb.FlightLive.Show do
   use AlbertAirlineWeb, :live_view
 
+  alias AlbertAirline.Bookings
   alias AlbertAirline.Flights
 
   @impl true
@@ -43,6 +44,40 @@ defmodule AlbertAirlineWeb.FlightLive.Show do
       end
 
     {:noreply, socket}
+  end
+
+  @impl true
+  def handle_event("book", _params, socket) do
+    seat_ids = MapSet.to_list(socket.assigns.selected_seat_ids)
+
+    case {socket.assigns.current_scope, seat_ids} do
+      {%{user: %{} = user}, seat_ids} when seat_ids != [] ->
+        success_url = url(~p"/bookings/confirm") <> "?session_id={CHECKOUT_SESSION_ID}"
+        cancel_url = url(~p"/bookings/cancelled")
+
+        case Bookings.start_checkout(
+               user,
+               socket.assigns.flight,
+               seat_ids,
+               success_url,
+               cancel_url
+             ) do
+          {:ok, %{url: checkout_url}} ->
+            {:noreply, redirect(socket, external: checkout_url)}
+
+          {:error, _reason} ->
+            {:noreply, put_flash(socket, :error, "Could not start checkout. Please try again.")}
+        end
+
+      {nil, seat_ids} when seat_ids != [] ->
+        {:noreply,
+         socket
+         |> put_flash(:error, "Please log in to book a flight.")
+         |> redirect(to: ~p"/users/log-in")}
+
+      _ ->
+        {:noreply, socket}
+    end
   end
 
   @impl true
@@ -160,12 +195,18 @@ defmodule AlbertAirlineWeb.FlightLive.Show do
         <div class="mt-4">
           <button
             type="button"
+            phx-click="book"
             disabled={MapSet.size(@selected_seat_ids) == 0}
             class="rounded-lg bg-[#2a9df1] px-6 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
-            title="Booking and payment are coming in the next feature"
           >
             Book the flight
           </button>
+          <p
+            :if={is_nil(@current_scope) and MapSet.size(@selected_seat_ids) > 0}
+            class="mt-2 text-sm text-black/60"
+          >
+            You'll be asked to log in before payment.
+          </p>
         </div>
         <p class="mt-2 text-sm text-black/60">
           ** Baggage fees reflect the airline's standard fees based on the selected fare class. **

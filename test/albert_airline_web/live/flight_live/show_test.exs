@@ -3,6 +3,7 @@ defmodule AlbertAirlineWeb.FlightLive.ShowTest do
 
   import Phoenix.LiveViewTest
   import AlbertAirline.FlightsFixtures
+  import AlbertAirline.AccountsFixtures
 
   alias AlbertAirline.Flights
 
@@ -75,6 +76,33 @@ defmodule AlbertAirlineWeb.FlightLive.ShowTest do
     html_a_after = render(viewer_a)
     assert html_a_after =~ "Total fee (0 seats)"
     assert html_a_after =~ "just taken and removed from your selection"
+  end
+
+  test "clicking Book the flight while logged out redirects to login", %{
+    conn: conn,
+    flight: flight,
+    seat: seat
+  } do
+    {:ok, lv, _html} = live(conn, ~p"/flights/#{flight.id}")
+
+    lv |> element("button[phx-value-id='#{seat.id}']") |> render_click()
+
+    assert {:error, {:redirect, %{to: "/users/log-in"}}} =
+             lv |> element("button", "Book the flight") |> render_click()
+  end
+
+  test "clicking Book the flight while logged in redirects to Stripe checkout", %{
+    conn: conn,
+    flight: flight,
+    seat: seat
+  } do
+    conn = log_in_user(conn, user_fixture())
+    {:ok, lv, _html} = live(conn, ~p"/flights/#{flight.id}")
+
+    lv |> element("button[phx-value-id='#{seat.id}']") |> render_click()
+
+    assert {:error, {:redirect, %{to: "https://stripe.test/checkout/" <> _}}} =
+             lv |> element("button", "Book the flight") |> render_click()
   end
 
   defp button_tag(html, seat_id) do
