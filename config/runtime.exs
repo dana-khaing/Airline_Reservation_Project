@@ -23,6 +23,10 @@ end
 config :albert_airline, AlbertAirlineWeb.Endpoint,
   http: [port: String.to_integer(System.get_env("PORT", "4000"))]
 
+# A Stripe test-mode secret key (sk_test_...), needed for real checkout
+# sessions in dev/prod. Not required in :test, which uses a stub adapter.
+config :albert_airline, :stripe_secret_key, System.get_env("STRIPE_SECRET_KEY")
+
 if config_env() == :dev do
   # Reload browser tabs when matching files change.
   config :albert_airline, AlbertAirlineWeb.Endpoint,

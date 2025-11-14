@@ -26,6 +26,9 @@ config :albert_airline, AlbertAirlineWeb.Endpoint,
 # In test we don't send emails
 config :albert_airline, AlbertAirline.Mailer, adapter: Swoosh.Adapters.Test
 
+# In test we never call the real Stripe API
+config :albert_airline, :payments_adapter, AlbertAirline.Payments.StubClient
+
 # Disable swoosh api client as it is only required for production adapters
 config :swoosh, :api_client, false
 
