@@ -8,8 +8,4 @@ defmodule AlbertAirlineWeb.PageController do
   def about(conn, _params) do
     render(conn, :about)
   end
-
-  def contact(conn, _params) do
-    render(conn, :contact)
-  end
 end

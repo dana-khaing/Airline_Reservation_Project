@@ -22,7 +22,6 @@ defmodule AlbertAirlineWeb.Router do
 
     get "/", PageController, :home
     get "/about", PageController, :about
-    get "/contact", PageController, :contact
     get "/bookings/cancelled", BookingController, :cancelled
   end
 
@@ -70,6 +69,7 @@ defmodule AlbertAirlineWeb.Router do
       live "/users/register", UserLive.Registration, :new
       live "/users/log-in", UserLive.Login, :new
       live "/users/log-in/:token", UserLive.Confirmation, :new
+      live "/contact", ContactLive.New, :new
       live "/search", FlightLive.Search, :index
       live "/flights/:id", FlightLive.Show, :show
       live "/bookings/confirm", BookingLive.Confirmation, :show
