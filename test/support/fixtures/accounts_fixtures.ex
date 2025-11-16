@@ -41,6 +41,21 @@ defmodule AlbertAirline.AccountsFixtures do
     user
   end
 
+  @doc """
+  is_admin is deliberately excluded from every changeset's cast list (no
+  form should ever be able to self-promote a user), so admin fixtures grant
+  it via a direct DB update instead — the same way the seed script does.
+  """
+  def admin_user_fixture(attrs \\ %{}) do
+    user = user_fixture(attrs)
+
+    AlbertAirline.Repo.update_all(from(u in Accounts.User, where: u.id == ^user.id),
+      set: [is_admin: true]
+    )
+
+    %{user | is_admin: true}
+  end
+
   def user_scope_fixture do
     user = user_fixture()
     user_scope_fixture(user)

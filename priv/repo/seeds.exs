@@ -9,6 +9,8 @@
 # 10x10 mockup layout) with a few seats already booked so the seat map has
 # something to show from the start.
 
+import Ecto.Query
+
 alias AlbertAirline.Accounts
 alias AlbertAirline.Repo
 alias AlbertAirline.Flights.{Airline, Airport, Flight, Seat}
@@ -19,6 +21,16 @@ demo_user = Repo.update!(AlbertAirline.Accounts.User.confirm_changeset(demo_user
 
 {:ok, {demo_user, _expired_tokens}} =
   Accounts.update_user_password(demo_user, %{password: "albertairline-demo"})
+
+{:ok, admin_user} = Accounts.register_user(%{email: "admin@albertairline.test"})
+admin_user = Repo.update!(AlbertAirline.Accounts.User.confirm_changeset(admin_user))
+
+{:ok, {admin_user, _expired_tokens}} =
+  Accounts.update_user_password(admin_user, %{password: "albertairline-admin"})
+
+Repo.update_all(from(u in AlbertAirline.Accounts.User, where: u.id == ^admin_user.id),
+  set: [is_admin: true]
+)
 
 seat_rows = 1..10
 seat_columns = ~w(A B C D E F G H I J)
@@ -198,3 +210,4 @@ IO.puts(
 )
 
 IO.puts("Demo login: demo@albertairline.test / albertairline-demo")
+IO.puts("Admin login: admin@albertairline.test / albertairline-admin")
