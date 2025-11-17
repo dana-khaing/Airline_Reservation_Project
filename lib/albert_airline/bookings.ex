@@ -208,4 +208,43 @@ defmodule AlbertAirline.Bookings do
   defp generate_confirmation_code do
     :crypto.strong_rand_bytes(6) |> Base.encode32(case: :upper, padding: false)
   end
+
+  @doc """
+  Returns a user's bookings (any status), soonest-departing flight first,
+  with seat/flight/airline/airport data preloaded for display.
+  """
+  def list_bookings_for_user(user_id) do
+    Repo.all(
+      from(b in Booking,
+        where: b.user_id == ^user_id,
+        join: f in assoc(b, :flight),
+        order_by: [asc: f.departure_time],
+        preload: [:seat, flight: [:airline, :departure_airport, :arrival_airport]]
+      )
+    )
+  end
+
+  @doc """
+  Cancels a booking: marks it cancelled and frees its seat back to
+  available, atomically, in one transaction. The seat's PubSub broadcast
+  fires only after the transaction commits, same as booking confirmation —
+  so anyone watching that flight's seat map sees it open up live.
+  """
+  def cancel_booking(%Booking{} = booking) do
+    booking = Repo.preload(booking, :seat)
+
+    multi =
+      Ecto.Multi.new()
+      |> Ecto.Multi.update(:booking, Booking.changeset(booking, %{status: "cancelled"}))
+      |> Ecto.Multi.update(:seat, Flights.change_seat(booking.seat, %{status: "available"}))
+
+    case Repo.transaction(multi) do
+      {:ok, %{booking: booking, seat: seat}} ->
+        Flights.broadcast_seat_updated(seat)
+        {:ok, booking}
+
+      {:error, _failed_op, changeset, _changes} ->
+        {:error, changeset}
+    end
+  end
 end
