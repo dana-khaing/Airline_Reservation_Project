@@ -44,52 +44,54 @@ defmodule AlbertAirlineWeb.AdminLive.FlightIndex do
           <h2 class="text-2xl font-bold">Flights</h2>
           <.link
             navigate={~p"/admin/flights/new"}
-            class="rounded-lg bg-[#2a9df1] px-4 py-2 font-semibold text-white"
+            class="rounded-lg bg-[#2563eb] px-4 py-2 font-semibold text-white"
           >
             New Flight
           </.link>
         </div>
 
-        <table class="mt-6 w-full albert-card text-left">
-          <thead>
-            <tr class="border-b border-black/20">
-              <th class="pb-2">Flight</th>
-              <th class="pb-2">Route</th>
-              <th class="pb-2">Departs</th>
-              <th class="pb-2">Airline</th>
-              <th class="pb-2">Price</th>
-              <th class="pb-2"></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr :for={flight <- @flights} class="border-b border-black/10">
-              <td class="py-2">{flight.flight_number}</td>
-              <td class="py-2">
-                {flight.departure_airport.iata_code} → {flight.arrival_airport.iata_code}
-              </td>
-              <td class="py-2">{Calendar.strftime(flight.departure_time, "%Y-%m-%d %H:%M")}</td>
-              <td class="py-2">{flight.airline.name}</td>
-              <td class="py-2">${flight.base_price}</td>
-              <td class="py-2 text-right">
-                <.link
-                  navigate={~p"/admin/flights/#{flight.id}/edit"}
-                  class="text-[#2a9df1] hover:underline"
-                >
-                  Edit
-                </.link>
-                <button
-                  type="button"
-                  phx-click="delete"
-                  phx-value-id={flight.id}
-                  data-confirm="Delete this flight?"
-                  class="ml-3 text-red-600 hover:underline"
-                >
-                  Delete
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="mt-6 albert-card overflow-x-auto">
+          <table class="w-full text-left">
+            <thead>
+              <tr class="border-b border-black/20">
+                <th class="pb-2">Flight</th>
+                <th class="pb-2">Route</th>
+                <th class="pb-2">Departs</th>
+                <th class="pb-2">Airline</th>
+                <th class="pb-2">Price</th>
+                <th class="pb-2"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr :for={flight <- @flights} class="border-b border-black/10">
+                <td class="py-2">{flight.flight_number}</td>
+                <td class="py-2">
+                  {flight.departure_airport.iata_code} → {flight.arrival_airport.iata_code}
+                </td>
+                <td class="py-2">{Calendar.strftime(flight.departure_time, "%Y-%m-%d %H:%M")}</td>
+                <td class="py-2">{flight.airline.name}</td>
+                <td class="py-2">${flight.base_price}</td>
+                <td class="py-2 text-right">
+                  <.link
+                    navigate={~p"/admin/flights/#{flight.id}/edit"}
+                    class="text-[#2563eb] hover:underline"
+                  >
+                    Edit
+                  </.link>
+                  <button
+                    type="button"
+                    phx-click="delete"
+                    phx-value-id={flight.id}
+                    data-confirm="Delete this flight?"
+                    class="ml-3 text-red-600 hover:underline"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </Layouts.app>
     """

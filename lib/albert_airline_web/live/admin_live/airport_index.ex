@@ -36,48 +36,50 @@ defmodule AlbertAirlineWeb.AdminLive.AirportIndex do
           <h2 class="text-2xl font-bold">Airports</h2>
           <.link
             navigate={~p"/admin/airports/new"}
-            class="rounded-lg bg-[#2a9df1] px-4 py-2 font-semibold text-white"
+            class="rounded-lg bg-[#2563eb] px-4 py-2 font-semibold text-white"
           >
             New Airport
           </.link>
         </div>
 
-        <table class="mt-6 w-full albert-card text-left">
-          <thead>
-            <tr class="border-b border-black/20">
-              <th class="pb-2">IATA</th>
-              <th class="pb-2">Name</th>
-              <th class="pb-2">City</th>
-              <th class="pb-2">Country</th>
-              <th class="pb-2"></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr :for={airport <- @airports} class="border-b border-black/10">
-              <td class="py-2">{airport.iata_code}</td>
-              <td class="py-2">{airport.name}</td>
-              <td class="py-2">{airport.city}</td>
-              <td class="py-2">{airport.country}</td>
-              <td class="py-2 text-right">
-                <.link
-                  navigate={~p"/admin/airports/#{airport.id}/edit"}
-                  class="text-[#2a9df1] hover:underline"
-                >
-                  Edit
-                </.link>
-                <button
-                  type="button"
-                  phx-click="delete"
-                  phx-value-id={airport.id}
-                  data-confirm="Delete this airport?"
-                  class="ml-3 text-red-600 hover:underline"
-                >
-                  Delete
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="mt-6 albert-card overflow-x-auto">
+          <table class="w-full text-left">
+            <thead>
+              <tr class="border-b border-black/20">
+                <th class="pb-2">IATA</th>
+                <th class="pb-2">Name</th>
+                <th class="pb-2">City</th>
+                <th class="pb-2">Country</th>
+                <th class="pb-2"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr :for={airport <- @airports} class="border-b border-black/10">
+                <td class="py-2">{airport.iata_code}</td>
+                <td class="py-2">{airport.name}</td>
+                <td class="py-2">{airport.city}</td>
+                <td class="py-2">{airport.country}</td>
+                <td class="py-2 text-right">
+                  <.link
+                    navigate={~p"/admin/airports/#{airport.id}/edit"}
+                    class="text-[#2563eb] hover:underline"
+                  >
+                    Edit
+                  </.link>
+                  <button
+                    type="button"
+                    phx-click="delete"
+                    phx-value-id={airport.id}
+                    data-confirm="Delete this airport?"
+                    class="ml-3 text-red-600 hover:underline"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </Layouts.app>
     """
