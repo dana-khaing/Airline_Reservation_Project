@@ -10,4 +10,14 @@ defmodule AlbertAirlineWeb.PageControllerTest do
     conn = get(conn, ~p"/about")
     assert html_response(conn, 200) =~ "ABOUT US"
   end
+
+  test "the shared layout has a skip link and a main landmark for keyboard/screen-reader users",
+       %{
+         conn: conn
+       } do
+    html = get(conn, ~p"/") |> html_response(200)
+
+    assert html =~ ~s(href="#main-content")
+    assert html =~ ~s(id="main-content")
+  end
 end

@@ -45,7 +45,9 @@ defmodule AlbertAirlineWeb.ContactLive.New do
     ~H"""
     <Layouts.app flash={@flash} current_scope={@current_scope}>
       <div class="albert-card mx-auto max-w-3xl text-center">
-        <h3 class="text-xl font-semibold">Connect with Us</h3>
+        <h2 class="text-2xl font-bold">Contact Us</h2>
+
+        <h3 class="mt-6 text-xl font-semibold">Connect with Us</h3>
         <p class="mt-2 text-lg">
           We're here to connect with you! Feel free to reach out through email or
           social media. Your feedback, questions, and suggestions are valuable to
@@ -100,7 +102,7 @@ defmodule AlbertAirlineWeb.ContactLive.New do
 
           <button
             type="submit"
-            class="mt-2 cursor-pointer rounded-md bg-[#2a9df1] px-4 py-2 font-semibold text-white"
+            class="mt-2 cursor-pointer rounded-md bg-[#2563eb] px-4 py-2 font-semibold text-white"
           >
             Submit
           </button>
