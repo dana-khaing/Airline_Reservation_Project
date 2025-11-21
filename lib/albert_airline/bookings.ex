@@ -171,39 +171,51 @@ defmodule AlbertAirline.Bookings do
     seat_ids = seat_ids_str |> String.split(",") |> Enum.map(&String.to_integer/1)
 
     flight = Flights.get_flight!(flight_id)
-    seats = Enum.map(seat_ids, &Flights.get_seat!/1)
+    seats = Flights.get_seats(seat_ids)
     now = DateTime.utc_now(:second)
 
-    multi =
-      Enum.reduce(seats, Ecto.Multi.new(), fn seat, multi ->
-        multi
-        |> Ecto.Multi.insert(
-          {:booking, seat.id},
-          Booking.changeset(%Booking{}, %{
-            seat_id: seat.id,
-            flight_id: flight_id,
-            user_id: user_id,
-            status: "confirmed",
-            total_price: flight.base_price,
-            confirmation_code: confirmation_code,
-            booked_at: now
-          })
-        )
-        |> Ecto.Multi.update({:seat, seat.id}, Flights.change_seat(seat, %{status: "booked"}))
-      end)
+    if length(seats) != length(seat_ids) do
+      # One of the seat ids from the checkout session's metadata no longer
+      # resolves to a real seat — shouldn't happen in normal operation, but
+      # proceeding would silently book fewer seats than the customer paid
+      # for. Treat it the same as a conflict: refund rather than guess.
+      refund_and_report_conflict(session)
+    else
+      multi =
+        Enum.reduce(seats, Ecto.Multi.new(), fn seat, multi ->
+          multi
+          |> Ecto.Multi.insert(
+            {:booking, seat.id},
+            Booking.changeset(%Booking{}, %{
+              seat_id: seat.id,
+              flight_id: flight_id,
+              user_id: user_id,
+              status: "confirmed",
+              total_price: flight.base_price,
+              confirmation_code: confirmation_code,
+              booked_at: now
+            })
+          )
+          |> Ecto.Multi.update({:seat, seat.id}, Flights.change_seat(seat, %{status: "booked"}))
+        end)
 
-    case Repo.transaction(multi) do
-      {:ok, results} ->
-        Enum.each(seat_ids, fn id -> Flights.broadcast_seat_updated(results[{:seat, id}]) end)
-        {:ok, Enum.map(seat_ids, &results[{:booking, &1}])}
+      case Repo.transaction(multi) do
+        {:ok, results} ->
+          Enum.each(seat_ids, fn id -> Flights.broadcast_seat_updated(results[{:seat, id}]) end)
+          {:ok, Enum.map(seat_ids, &results[{:booking, &1}])}
 
-      {:error, _failed_op, _reason, _changes} ->
-        if session.payment_intent, do: Payments.refund(session.payment_intent)
-        {:error, :seat_conflict}
+        {:error, _failed_op, _reason, _changes} ->
+          refund_and_report_conflict(session)
+      end
     end
   end
 
   defp do_confirm(_session, _confirmation_code), do: {:error, :payment_not_completed}
+
+  defp refund_and_report_conflict(session) do
+    if session.payment_intent, do: Payments.refund(session.payment_intent)
+    {:error, :seat_conflict}
+  end
 
   defp generate_confirmation_code do
     :crypto.strong_rand_bytes(6) |> Base.encode32(case: :upper, padding: false)
