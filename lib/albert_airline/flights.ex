@@ -325,7 +325,10 @@ defmodule AlbertAirline.Flights do
 
   """
   def delete_flight(%Flight{} = flight) do
-    Repo.delete(flight)
+    flight
+    |> Ecto.Changeset.change()
+    |> Ecto.Changeset.no_assoc_constraint(:bookings, name: :bookings_flight_id_fkey)
+    |> Repo.delete()
   end
 
   @doc """

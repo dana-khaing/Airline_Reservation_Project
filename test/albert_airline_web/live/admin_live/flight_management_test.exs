@@ -4,6 +4,7 @@ defmodule AlbertAirlineWeb.AdminLive.FlightManagementTest do
   import Phoenix.LiveViewTest
   import AlbertAirline.AccountsFixtures
   import AlbertAirline.FlightsFixtures
+  import AlbertAirline.BookingsFixtures
 
   alias AlbertAirline.Flights
 
@@ -73,5 +74,17 @@ defmodule AlbertAirlineWeb.AdminLive.FlightManagementTest do
     lv |> element("button[phx-value-id='#{flight.id}']") |> render_click()
 
     assert_raise Ecto.NoResultsError, fn -> Flights.get_flight!(flight.id) end
+  end
+
+  test "a flight with bookings cannot be deleted", %{conn: conn} do
+    flight = flight_fixture()
+    seat = seat_fixture(%{flight_id: flight.id})
+    booking_fixture(%{flight_id: flight.id, seat_id: seat.id})
+
+    {:ok, lv, _html} = live(conn, ~p"/admin/flights")
+    html = lv |> element("button[phx-value-id='#{flight.id}']") |> render_click()
+
+    assert html =~ "Can&#39;t delete"
+    assert Flights.get_flight!(flight.id)
   end
 end
