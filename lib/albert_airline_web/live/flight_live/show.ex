@@ -3,6 +3,7 @@ defmodule AlbertAirlineWeb.FlightLive.Show do
 
   alias AlbertAirline.Bookings
   alias AlbertAirline.Flights
+  alias AlbertAirlineWeb.FlightLive.Helpers
 
   @impl true
   def mount(%{"id" => id}, _session, socket) do
@@ -148,7 +149,7 @@ defmodule AlbertAirlineWeb.FlightLive.Show do
           {Calendar.strftime(@flight.departure_time, "%H:%M")} - {Calendar.strftime(
             @flight.arrival_time,
             "%H:%M"
-          )} ({stops_label(@flight.stops)})
+          )} ({Helpers.stops_label(@flight.stops)})
         </h2>
         <h3 class="mt-2 text-xl">
           {@flight.departure_airport.iata_code} ------&gt; {@flight.arrival_airport.iata_code}
@@ -234,8 +235,4 @@ defmodule AlbertAirlineWeb.FlightLive.Show do
     </Layouts.app>
     """
   end
-
-  defp stops_label(0), do: "Direct"
-  defp stops_label(1), do: "1 Connection"
-  defp stops_label(n), do: "#{n} Connections"
 end
