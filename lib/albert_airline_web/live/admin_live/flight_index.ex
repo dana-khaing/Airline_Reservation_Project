@@ -6,13 +6,10 @@ defmodule AlbertAirlineWeb.AdminLive.FlightIndex do
 
   @impl true
   def mount(_params, _session, socket) do
-    flights =
-      Flights.list_flights() |> Repo.preload([:airline, :departure_airport, :arrival_airport])
-
     {:ok,
      socket
      |> assign(:page_title, "Flights")
-     |> assign(:flights, flights)}
+     |> assign(:flights, load_flights())}
   end
 
   @impl true
@@ -22,17 +19,17 @@ defmodule AlbertAirlineWeb.AdminLive.FlightIndex do
     socket =
       case Flights.delete_flight(flight) do
         {:ok, _} ->
-          flights =
-            Flights.list_flights()
-            |> Repo.preload([:airline, :departure_airport, :arrival_airport])
-
-          assign(socket, :flights, flights)
+          assign(socket, :flights, load_flights())
 
         {:error, _changeset} ->
           put_flash(socket, :error, "Can't delete a flight that has bookings.")
       end
 
     {:noreply, socket}
+  end
+
+  defp load_flights do
+    Flights.list_flights() |> Repo.preload([:airline, :departure_airport, :arrival_airport])
   end
 
   @impl true
