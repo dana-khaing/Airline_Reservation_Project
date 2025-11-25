@@ -22,6 +22,13 @@ defmodule AlbertAirline.Flights do
   end
 
   @doc """
+  Counts airlines without loading them.
+  """
+  def count_airlines do
+    Repo.aggregate(Airline, :count)
+  end
+
+  @doc """
   Gets a single airline.
 
   Raises `Ecto.NoResultsError` if the Airline does not exist.
@@ -118,6 +125,13 @@ defmodule AlbertAirline.Flights do
   """
   def list_airports do
     Repo.all(Airport)
+  end
+
+  @doc """
+  Counts airports without loading them.
+  """
+  def count_airports do
+    Repo.aggregate(Airport, :count)
   end
 
   @doc """
@@ -222,6 +236,13 @@ defmodule AlbertAirline.Flights do
   """
   def list_flights do
     Repo.all(Flight)
+  end
+
+  @doc """
+  Counts flights without loading them.
+  """
+  def count_flights do
+    Repo.aggregate(Flight, :count)
   end
 
   @doc """
