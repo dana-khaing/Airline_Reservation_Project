@@ -3,6 +3,8 @@ defmodule AlbertAirline.Bookings do
   The Bookings context.
   """
 
+  require Logger
+
   import Ecto.Query, warn: false
   alias AlbertAirline.Flights
   alias AlbertAirline.Payments
@@ -193,6 +195,7 @@ defmodule AlbertAirline.Bookings do
               status: "confirmed",
               total_price: flight.base_price,
               confirmation_code: confirmation_code,
+              stripe_payment_intent_id: session.payment_intent,
               booked_at: now
             })
           )
@@ -241,22 +244,79 @@ defmodule AlbertAirline.Bookings do
   available, atomically, in one transaction. The seat's PubSub broadcast
   fires only after the transaction commits, same as booking confirmation —
   so anyone watching that flight's seat map sees it open up live.
+
+  Guarded against double-cancellation: the cancelling UPDATE is scoped to
+  `status != "cancelled"` at the database row level, so if two requests for
+  the same booking race each other, Postgres's row lock serializes them and
+  only the first one actually transitions the row — the second sees zero
+  rows affected and returns `{:error, :already_cancelled}` instead of firing
+  a second refund.
+
+  Also refunds the booking's price back to the original payment method, for
+  the portion of the order this one seat represents (not the whole
+  multi-seat order, if there was one). Bookings created before this existed,
+  or seeded directly, have no stripe_payment_intent_id and are cancelled
+  without attempting a refund. A refund failure (or a raised error from the
+  payment adapter) does not undo the cancellation — the booking stays
+  cancelled and the seat stays freed either way, since that's the part the
+  customer is relying on immediately; the failure is logged for manual
+  follow-up.
   """
   def cancel_booking(%Booking{} = booking) do
     booking = Repo.preload(booking, :seat)
+    now = DateTime.utc_now(:second)
+
+    cancel_query =
+      from(b in Booking, where: b.id == ^booking.id and b.status != "cancelled", select: b)
 
     multi =
       Ecto.Multi.new()
-      |> Ecto.Multi.update(:booking, Booking.changeset(booking, %{status: "cancelled"}))
-      |> Ecto.Multi.update(:seat, Flights.change_seat(booking.seat, %{status: "available"}))
+      |> Ecto.Multi.update_all(
+        :booking,
+        cancel_query,
+        set: [status: "cancelled", updated_at: now]
+      )
+      |> Ecto.Multi.run(:seat, fn repo, %{booking: {count, _rows}} ->
+        if count == 0 do
+          {:error, :already_cancelled}
+        else
+          repo.update(Flights.change_seat(booking.seat, %{status: "available"}))
+        end
+      end)
 
     case Repo.transaction(multi) do
-      {:ok, %{booking: booking, seat: seat}} ->
+      {:ok, %{booking: {1, [updated_booking]}, seat: seat}} ->
         Flights.broadcast_seat_updated(seat)
-        {:ok, booking}
+        maybe_refund_cancelled_booking(updated_booking)
+        {:ok, updated_booking}
+
+      {:error, :seat, :already_cancelled, _changes} ->
+        {:error, :already_cancelled}
 
       {:error, _failed_op, changeset, _changes} ->
         {:error, changeset}
     end
+  end
+
+  defp maybe_refund_cancelled_booking(%Booking{stripe_payment_intent_id: nil}), do: :ok
+
+  defp maybe_refund_cancelled_booking(%Booking{} = booking) do
+    case Payments.refund(booking.stripe_payment_intent_id, booking.total_price) do
+      {:ok, _result} ->
+        :ok
+
+      {:error, reason} ->
+        log_refund_failure(booking, reason)
+    end
+  rescue
+    error -> log_refund_failure(booking, error)
+  end
+
+  defp log_refund_failure(booking, reason) do
+    Logger.error(
+      "Refund failed for booking #{booking.id} (payment_intent #{booking.stripe_payment_intent_id}): #{inspect(reason)}"
+    )
+
+    :ok
   end
 end
