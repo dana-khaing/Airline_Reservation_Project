@@ -61,6 +61,10 @@ defmodule AlbertAirline.BookingsCheckoutTest do
       assert Enum.all?(bookings, &(&1.status == "confirmed"))
       assert Enum.all?(bookings, &(&1.user_id == user.id))
 
+      # stored so a later cancellation can actually refund this payment
+      assert Enum.all?(bookings, &(&1.stripe_payment_intent_id != nil))
+      assert Enum.uniq(Enum.map(bookings, & &1.stripe_payment_intent_id)) |> length() == 1
+
       assert Flights.get_seat!(seat_a.id).status == "booked"
       assert Flights.get_seat!(seat_b.id).status == "booked"
     end
