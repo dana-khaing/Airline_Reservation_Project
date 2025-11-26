@@ -24,5 +24,12 @@ defmodule AlbertAirline.Payments.Adapter do
               {:ok, %{id: String.t(), url: String.t()}} | {:error, term()}
   @callback retrieve_checkout_session(session_id :: String.t()) ::
               {:ok, session()} | {:error, term()}
-  @callback refund(payment_intent_id :: String.t()) :: {:ok, map()} | {:error, term()}
+  @doc """
+  Refunds a payment. `amount` nil refunds the full original payment (used
+  when an entire order fails, e.g. a seat conflict during checkout);
+  a `Decimal` amount issues a partial refund (used for cancelling one
+  booking out of a multi-seat order).
+  """
+  @callback refund(payment_intent_id :: String.t(), amount :: Decimal.t() | nil) ::
+              {:ok, map()} | {:error, term()}
 end
