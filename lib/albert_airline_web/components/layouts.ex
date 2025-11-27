@@ -75,7 +75,12 @@ defmodule AlbertAirlineWeb.Layouts do
 
       <.flash_group flash={@flash} />
 
-      <footer class="px-4 pb-6 text-right sm:px-8">
+      <footer class="flex flex-col items-end gap-1 px-4 pb-6 text-right sm:px-8">
+        <div class="flex flex-wrap justify-end gap-x-3 text-sm text-black/60">
+          <.link href="/terms" class="hover:underline">Terms of Service</.link>
+          <.link href="/privacy" class="hover:underline">Privacy Policy</.link>
+          <.link href="/refund-policy" class="hover:underline">Refund Policy</.link>
+        </div>
         <h6 class="text-sm text-black/70">powered by albert enterprise.</h6>
       </footer>
     </div>
