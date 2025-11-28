@@ -55,4 +55,20 @@ defmodule AlbertAirline.DataCase do
       end)
     end)
   end
+
+  @doc """
+  Drains any emails already sitting in this test process's mailbox
+  (e.g. an account-confirmation email sent incidentally by a fixture
+  like `user_fixture/1`) so a later `assert_email_sent`/`refute_email_sent`
+  can't grab an unrelated leftover message — `Swoosh.TestAssertions`
+  matches whichever `{:email, _}` message it receives first, not
+  specifically the one satisfying the assertion's filters.
+  """
+  def flush_emails do
+    receive do
+      {:email, _} -> flush_emails()
+    after
+      0 -> :ok
+    end
+  end
 end
