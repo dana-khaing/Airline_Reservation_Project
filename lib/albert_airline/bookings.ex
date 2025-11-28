@@ -6,11 +6,13 @@ defmodule AlbertAirline.Bookings do
   require Logger
 
   import Ecto.Query, warn: false
+  alias AlbertAirline.Accounts
   alias AlbertAirline.Flights
   alias AlbertAirline.Payments
   alias AlbertAirline.Repo
 
   alias AlbertAirline.Bookings.Booking
+  alias AlbertAirline.Bookings.BookingNotifier
 
   @doc """
   Returns the list of bookings.
@@ -205,7 +207,9 @@ defmodule AlbertAirline.Bookings do
       case Repo.transaction(multi) do
         {:ok, results} ->
           Enum.each(seat_ids, fn id -> Flights.broadcast_seat_updated(results[{:seat, id}]) end)
-          {:ok, Enum.map(seat_ids, &results[{:booking, &1}])}
+          bookings = Enum.map(seat_ids, &results[{:booking, &1}])
+          send_confirmation_email(user_id, flight, bookings)
+          {:ok, bookings}
 
         {:error, _failed_op, _reason, _changes} ->
           refund_and_report_conflict(session)
@@ -214,6 +218,21 @@ defmodule AlbertAirline.Bookings do
   end
 
   defp do_confirm(_session, _confirmation_code), do: {:error, :payment_not_completed}
+
+  defp send_confirmation_email(user_id, flight, bookings) do
+    user = Accounts.get_user!(user_id)
+    flight = Repo.preload(flight, [:departure_airport, :arrival_airport])
+    bookings = Repo.preload(bookings, :seat)
+    BookingNotifier.deliver_booking_confirmation(user, flight, bookings)
+    :ok
+  rescue
+    error ->
+      Logger.error(
+        "Failed to send booking confirmation email for user #{user_id}: #{inspect(error)}"
+      )
+
+      :ok
+  end
 
   defp refund_and_report_conflict(session) do
     if session.payment_intent, do: Payments.refund(session.payment_intent)
@@ -263,7 +282,7 @@ defmodule AlbertAirline.Bookings do
   follow-up.
   """
   def cancel_booking(%Booking{} = booking) do
-    booking = Repo.preload(booking, :seat)
+    booking = Repo.preload(booking, [:seat, :flight, :user])
     now = DateTime.utc_now(:second)
 
     cancel_query =
@@ -286,8 +305,16 @@ defmodule AlbertAirline.Bookings do
 
     case Repo.transaction(multi) do
       {:ok, %{booking: {1, [updated_booking]}, seat: seat}} ->
+        updated_booking = %{
+          updated_booking
+          | seat: seat,
+            flight: booking.flight,
+            user: booking.user
+        }
+
         Flights.broadcast_seat_updated(seat)
         maybe_refund_cancelled_booking(updated_booking)
+        send_cancellation_email(updated_booking)
         {:ok, updated_booking}
 
       {:error, :seat, :already_cancelled, _changes} ->
@@ -318,5 +345,17 @@ defmodule AlbertAirline.Bookings do
     )
 
     :ok
+  end
+
+  defp send_cancellation_email(%Booking{} = booking) do
+    BookingNotifier.deliver_booking_cancellation(booking)
+    :ok
+  rescue
+    error ->
+      Logger.error(
+        "Failed to send cancellation email for booking #{booking.id}: #{inspect(error)}"
+      )
+
+      :ok
   end
 end
