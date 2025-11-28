@@ -123,19 +123,23 @@ if config_env() == :prod do
 
   # ## Configuring the mailer
   #
-  # In production you need to configure the mailer to use a different adapter.
-  # Here is an example configuration for Mailgun:
-  #
-  #     config :albert_airline, AlbertAirline.Mailer,
-  #       adapter: Swoosh.Adapters.Mailgun,
-  #       api_key: System.get_env("MAILGUN_API_KEY"),
-  #       domain: System.get_env("MAILGUN_DOMAIN")
-  #
-  # Most non-SMTP adapters require an API client. Swoosh supports Req, Hackney,
-  # and Finch out-of-the-box. This configuration is typically done at
-  # compile-time in your config/prod.exs:
-  #
-  #     config :swoosh, :api_client, Swoosh.ApiClient.Req
-  #
-  # See https://swoosh.hexdocs.pm/Swoosh.html#module-installation for details.
+  # Booking confirmation/cancellation and account emails are sent via Resend
+  # (https://resend.com), over the Req API client already configured in
+  # config/prod.exs. RESEND_API_KEY must be set in production — without it,
+  # email delivery fails per-message (logged, non-fatal, same as a Stripe
+  # refund failure) rather than at boot, since a booking or cancellation
+  # should still succeed even if a transactional email can't go out.
+  resend_api_key = System.get_env("RESEND_API_KEY")
+
+  if resend_api_key do
+    config :albert_airline, AlbertAirline.Mailer,
+      adapter: Swoosh.Adapters.Resend,
+      api_key: resend_api_key
+  else
+    IO.warn(
+      "RESEND_API_KEY is not set — outgoing email (booking confirmations, cancellations, " <>
+        "login/confirmation links) will fail to send in production.",
+      []
+    )
+  end
 end
