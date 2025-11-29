@@ -7,6 +7,21 @@ defmodule AlbertAirline.Application do
 
   @impl true
   def start(_type, _args) do
+    :logger.add_handler(:sentry_handler, Sentry.LoggerHandler, %{
+      config: %{
+        metadata: [:file, :line],
+        rate_limiting: [max_events: 10, interval: 1_000],
+        # Bandit (this app's web server) logs unhandled request exceptions
+        # under the :bandit domain — excluded by Sentry's own default (meant
+        # to avoid double-reporting when Sentry.PlugCapture is also used,
+        # which this app doesn't use), so it's included back here to be the
+        # only path that reports web-request crashes.
+        excluded_domains: [],
+        capture_log_messages: true,
+        level: :error
+      }
+    })
+
     children = [
       AlbertAirlineWeb.Telemetry,
       AlbertAirline.Repo,
