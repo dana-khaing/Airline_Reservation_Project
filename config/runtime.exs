@@ -142,4 +142,19 @@ if config_env() == :prod do
       []
     )
   end
+
+  # ## Configuring error tracking
+  #
+  # Sentry only reports events when :dsn is set (see config/config.exs for
+  # the rest of the Sentry config, which is environment-independent). No
+  # SENTRY_DSN set means errors simply aren't reported — not a boot failure,
+  # since running without error tracking is a degraded-but-working state,
+  # unlike a missing database URL or secret key base above.
+  if sentry_dsn = System.get_env("SENTRY_DSN") do
+    config :sentry,
+      dsn: sentry_dsn,
+      environment_name: System.get_env("SENTRY_ENVIRONMENT", "production")
+  else
+    IO.warn("SENTRY_DSN is not set — errors will not be reported to Sentry in production.", [])
+  end
 end
