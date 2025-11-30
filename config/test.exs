@@ -29,6 +29,11 @@ config :albert_airline, AlbertAirline.Mailer, adapter: Swoosh.Adapters.Test
 # In test we never call the real Stripe API
 config :albert_airline, :payments_adapter, AlbertAirline.Payments.StubClient
 
+# Off by default in test — unrelated tests sharing one conn/peer IP would
+# otherwise trip each other's rate limits during a fast automated run.
+# Individual tests can flip this on to test the mechanism itself.
+config :albert_airline, AlbertAirline.RateLimiter, enabled: false
+
 # Disable swoosh api client as it is only required for production adapters
 config :swoosh, :api_client, false
 
