@@ -3,11 +3,13 @@ defmodule AlbertAirlineWeb.ContactLive.New do
 
   alias AlbertAirline.Contact
   alias AlbertAirline.Contact.Message
+  alias AlbertAirlineWeb.RateLimit
 
   @impl true
   def mount(_params, _session, socket) do
     {:ok,
      socket
+     |> RateLimit.assign_client_ip()
      |> assign(:page_title, "Contact Us")
      |> assign_form(Contact.change_message(%Message{}))}
   end
@@ -19,17 +21,24 @@ defmodule AlbertAirlineWeb.ContactLive.New do
   end
 
   def handle_event("save", %{"message" => params}, socket) do
-    params = maybe_attach_user(params, socket.assigns.current_scope)
+    case RateLimit.check("contact:#{socket.assigns.client_ip}", :timer.minutes(1), 5) do
+      :ok ->
+        params = maybe_attach_user(params, socket.assigns.current_scope)
 
-    case Contact.create_message(params) do
-      {:ok, _message} ->
+        case Contact.create_message(params) do
+          {:ok, _message} ->
+            {:noreply,
+             socket
+             |> assign_form(Contact.change_message(%Message{}))
+             |> put_flash(:info, "Thanks for reaching out — we'll get back to you soon.")}
+
+          {:error, %Ecto.Changeset{} = changeset} ->
+            {:noreply, assign_form(socket, changeset)}
+        end
+
+      {:error, :rate_limited} ->
         {:noreply,
-         socket
-         |> assign_form(Contact.change_message(%Message{}))
-         |> put_flash(:info, "Thanks for reaching out — we'll get back to you soon.")}
-
-      {:error, %Ecto.Changeset{} = changeset} ->
-        {:noreply, assign_form(socket, changeset)}
+         put_flash(socket, :error, "Too many requests. Please wait a moment and try again.")}
     end
   end
 
