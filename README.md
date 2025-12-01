@@ -58,6 +58,14 @@ Seed data creates two accounts:
 | `DATABASE_URL`       | prod           | `ecto://USER:PASS@HOST/DATABASE`                      |
 | `SECRET_KEY_BASE`    | prod           | Generate with `mix phx.gen.secret`                    |
 | `PHX_HOST`           | prod           | Public hostname (e.g. `albert-airline.fly.dev`)        |
+| `RESEND_API_KEY`     | prod (optional) | [Resend](https://resend.com) API key for booking/account emails. Without it, the app still runs — email delivery is logged and skipped, not a boot failure. |
+| `SENTRY_DSN`         | prod (optional) | Sentry project DSN for error tracking. Without it, the app still runs — errors just aren't reported. |
+| `SENTRY_ENVIRONMENT` | prod (optional) | Sentry environment label. Defaults to `"production"`. |
+
+See [`GO_LIVE.md`](GO_LIVE.md) for the full checklist of what's left before this
+can serve real customers/bookings — most of it is exactly this table: real
+accounts and credentials for Stripe, Resend, Sentry, and Fly.io that only the
+project owner can create.
 
 ## Testing
 
