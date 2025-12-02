@@ -1,6 +1,7 @@
 defmodule AlbertAirline.BookingsCheckoutTest do
   use AlbertAirline.DataCase, async: true
 
+  import ExUnit.CaptureLog
   import Swoosh.TestAssertions
 
   alias AlbertAirline.Bookings
@@ -139,6 +140,53 @@ defmodule AlbertAirline.BookingsCheckoutTest do
 
       assert Bookings.list_bookings_by_confirmation_code(losing_code) == []
       assert Flights.get_seat!(seat_a.id).status == "booked"
+    end
+
+    test "logs (rather than silently dropping) a refund failure during a lost seat-conflict checkout",
+         %{
+           flight: flight,
+           seat_a: seat_a,
+           user: user
+         } do
+      # someone else's checkout confirms first, claiming the seat
+      other_user = user_fixture()
+
+      {:ok, %{id: other_session_id}} =
+        Bookings.start_checkout(
+          other_user,
+          flight,
+          [seat_a.id],
+          "https://example.com/ok",
+          "https://example.com/cancel"
+        )
+
+      assert {:ok, [_other_booking]} = Bookings.confirm_from_stripe_session(other_session_id)
+
+      # the loser's checkout session is set up (directly via the stub, same
+      # pattern as the unpaid-session test below) so its refund attempt fails
+      {:ok, %{id: losing_session_id}} =
+        AlbertAirline.Payments.create_checkout_session(%{
+          amount: flight.base_price,
+          description: "test",
+          success_url: "https://example.com/ok",
+          cancel_url: "https://example.com/cancel",
+          metadata: %{
+            "confirmation_code" => "REFUNDFAILTEST",
+            "flight_id" => to_string(flight.id),
+            "user_id" => to_string(user.id),
+            "seat_ids" => to_string(seat_a.id),
+            "simulate_refund_failure" => "true"
+          }
+        })
+
+      log =
+        capture_log(fn ->
+          assert {:error, :seat_conflict} =
+                   Bookings.confirm_from_stripe_session(losing_session_id)
+        end)
+
+      assert log =~ "Refund failed for lost seat-conflict checkout"
+      assert Bookings.list_bookings_by_confirmation_code("REFUNDFAILTEST") == []
     end
 
     test "does not create bookings for an unpaid/abandoned session", %{
