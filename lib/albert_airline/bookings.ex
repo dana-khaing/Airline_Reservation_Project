@@ -233,7 +233,7 @@ defmodule AlbertAirline.Bookings do
   end
 
   defp log_email_failure(context, reason) do
-    Logger.error("Failed to send #{context} email: #{inspect(reason)}")
+    Logger.error("Failed to send email (#{context}): #{inspect(reason)}")
     :ok
   end
 
