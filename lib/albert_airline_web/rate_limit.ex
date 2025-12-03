@@ -7,7 +7,7 @@ defmodule AlbertAirlineWeb.RateLimit do
   POST like `/users/log-in`.
   """
 
-  import Phoenix.LiveView, only: [get_connect_info: 2]
+  import Phoenix.LiveView, only: [get_connect_info: 2, put_flash: 3]
   import Phoenix.Component, only: [assign: 3]
 
   @doc """
@@ -29,4 +29,14 @@ defmodule AlbertAirlineWeb.RateLimit do
 
   @doc "Checks and increments the counter for `key`. See `AlbertAirline.RateLimiter.check/3`."
   defdelegate check(key, scale_ms, limit), to: AlbertAirline.RateLimiter
+
+  @doc """
+  The standard `handle_event/3` return for a rate-limited request: flashes
+  an error and takes no other action, leaving the rest of the socket's
+  state untouched.
+  """
+  def deny(socket) do
+    {:noreply,
+     put_flash(socket, :error, "Too many requests. Please wait a moment and try again.")}
+  end
 end

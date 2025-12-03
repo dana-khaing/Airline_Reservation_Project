@@ -37,8 +37,7 @@ defmodule AlbertAirlineWeb.ContactLive.New do
         end
 
       {:error, :rate_limited} ->
-        {:noreply,
-         put_flash(socket, :error, "Too many requests. Please wait a moment and try again.")}
+        RateLimit.deny(socket)
     end
   end
 
