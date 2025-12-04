@@ -392,6 +392,20 @@ defmodule AlbertAirline.FlightsTest do
       assert id == one_stop.id
     end
 
+    test "ignores unrecognized stop categories instead of raising", %{
+      direct: direct,
+      one_stop: one_stop
+    } do
+      results = Flights.search_flights(%{stops: ["bogus"]})
+      assert Enum.map(results, & &1.id) |> Enum.sort() == Enum.sort([direct.id, one_stop.id])
+
+      assert [%{id: id}] = Flights.search_flights(%{stops: ["bogus", "direct"]})
+      assert id == direct.id
+
+      results = Flights.search_flights(%{stops: ["bogus", "direct", "one_stop"]})
+      assert Enum.map(results, & &1.id) |> Enum.sort() == Enum.sort([direct.id, one_stop.id])
+    end
+
     test "filters by airline", %{albert: albert, direct: direct} do
       assert [%{id: id}] = Flights.search_flights(%{airline_ids: [albert.id]})
       assert id == direct.id
