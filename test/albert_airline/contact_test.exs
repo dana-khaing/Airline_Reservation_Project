@@ -33,18 +33,31 @@ defmodule AlbertAirline.ContactTest do
       assert message.user_id == nil
     end
 
-    test "create_message/1 attributes to a logged-in user when given one", %{} do
+    test "create_message/2 attributes to a logged-in user when given one" do
       user = user_fixture()
 
       valid_attrs = %{
         first_name: "Jane",
         last_name: "Doe",
-        email: "jane@example.com",
-        user_id: user.id
+        email: "jane@example.com"
       }
 
-      assert {:ok, %Message{} = message} = Contact.create_message(valid_attrs)
+      assert {:ok, %Message{} = message} = Contact.create_message(valid_attrs, user.id)
       assert message.user_id == user.id
+    end
+
+    test "create_message/1 ignores a user_id smuggled in through attrs" do
+      other_user = user_fixture()
+
+      attrs = %{
+        first_name: "Jane",
+        last_name: "Doe",
+        email: "jane@example.com",
+        user_id: other_user.id
+      }
+
+      assert {:ok, %Message{} = message} = Contact.create_message(attrs)
+      assert message.user_id == nil
     end
 
     test "create_message/1 requires first name, last name, and email" do

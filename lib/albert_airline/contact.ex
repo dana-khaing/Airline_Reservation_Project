@@ -20,7 +20,11 @@ defmodule AlbertAirline.Contact do
   end
 
   @doc """
-  Creates a contact message.
+  Creates a contact message, attributed to `user_id` when given.
+
+  `user_id` is applied via `put_change/3` rather than accepted through
+  `attrs`, since it is set programmatically from the caller's session, not
+  submitted by the visitor filling out the form.
 
   ## Examples
 
@@ -31,11 +35,17 @@ defmodule AlbertAirline.Contact do
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_message(attrs) do
+  def create_message(attrs, user_id \\ nil) do
     %Message{}
     |> Message.changeset(attrs)
+    |> put_user_id(user_id)
     |> Repo.insert()
   end
+
+  defp put_user_id(changeset, nil), do: changeset
+
+  defp put_user_id(changeset, user_id),
+    do: Ecto.Changeset.put_change(changeset, :user_id, user_id)
 
   @doc """
   Returns an `%Ecto.Changeset{}` for tracking message changes.

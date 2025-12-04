@@ -16,7 +16,7 @@ defmodule AlbertAirline.Contact.Message do
   @doc false
   def changeset(message, attrs) do
     message
-    |> cast(attrs, [:first_name, :last_name, :company_name, :email, :user_id])
+    |> cast(attrs, [:first_name, :last_name, :company_name, :email])
     |> validate_required([:first_name, :last_name, :email])
     |> validate_format(:email, ~r/^[^@,;\s]+@[^@,;\s]+$/,
       message: "must have the @ sign and no spaces"
