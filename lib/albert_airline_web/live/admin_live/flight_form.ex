@@ -3,6 +3,7 @@ defmodule AlbertAirlineWeb.AdminLive.FlightForm do
 
   alias AlbertAirline.Flights
   alias AlbertAirline.Flights.Flight
+  alias AlbertAirlineWeb.FlightLive.Helpers
 
   @impl true
   def mount(params, _session, socket) do
@@ -60,10 +61,6 @@ defmodule AlbertAirlineWeb.AdminLive.FlightForm do
     assign(socket, :form, to_form(changeset, as: "flight"))
   end
 
-  defp airport_options(airports) do
-    Enum.map(airports, fn a -> {"#{a.iata_code} — #{a.name}", a.id} end)
-  end
-
   defp airline_options(airlines) do
     Enum.map(airlines, fn a -> {a.name, a.id} end)
   end
@@ -98,14 +95,14 @@ defmodule AlbertAirlineWeb.AdminLive.FlightForm do
             type="select"
             label="Departure airport"
             prompt="Select airport"
-            options={airport_options(@airports)}
+            options={Helpers.airport_options(@airports)}
           />
           <.input
             field={@form[:arrival_airport_id]}
             type="select"
             label="Arrival airport"
             prompt="Select airport"
-            options={airport_options(@airports)}
+            options={Helpers.airport_options(@airports)}
           />
           <.input field={@form[:departure_time]} type="datetime-local" label="Departure time" />
           <.input field={@form[:arrival_time]} type="datetime-local" label="Arrival time" />
