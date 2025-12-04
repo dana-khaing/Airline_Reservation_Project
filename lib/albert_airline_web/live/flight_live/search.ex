@@ -63,10 +63,6 @@ defmodule AlbertAirlineWeb.FlightLive.Search do
     Map.new(flights, fn flight -> {flight.id, Flights.available_seat_count(flight.id)} end)
   end
 
-  defp airport_options(airports) do
-    Enum.map(airports, fn a -> {"#{a.iata_code} — #{a.name}", a.id} end)
-  end
-
   @impl true
   def render(assigns) do
     ~H"""
@@ -82,7 +78,7 @@ defmodule AlbertAirlineWeb.FlightLive.Search do
                 label="Flying From"
                 prompt="Departure Terminal"
                 value={@criteria.departure_airport_id}
-                options={airport_options(@airports)}
+                options={Helpers.airport_options(@airports)}
               />
               <.input
                 type="select"
@@ -90,7 +86,7 @@ defmodule AlbertAirlineWeb.FlightLive.Search do
                 label="Flying To"
                 prompt="Arrival Terminal"
                 value={@criteria.arrival_airport_id}
-                options={airport_options(@airports)}
+                options={Helpers.airport_options(@airports)}
               />
               <.input
                 type="date"
