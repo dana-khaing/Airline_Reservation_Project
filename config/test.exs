@@ -29,6 +29,9 @@ config :albert_airline, AlbertAirline.Mailer, adapter: Swoosh.Adapters.Test
 # In test we never call the real Stripe API
 config :albert_airline, :payments_adapter, AlbertAirline.Payments.StubClient
 
+# In test we never call the real Duffel API
+config :albert_airline, :flights_supplier_adapter, AlbertAirline.Flights.Supplier.StubClient
+
 # Off by default in test — unrelated tests sharing one conn/peer IP would
 # otherwise trip each other's rate limits during a fast automated run.
 # Individual tests can flip this on to test the mechanism itself.
