@@ -16,19 +16,37 @@ Nothing below is required to run the app as a demo/portfolio piece in Stripe
 
 ## 1. Real flight inventory
 
-**This is the biggest open gap and isn't started.** The app currently sells
-seats on flights created by hand through `/admin` or `priv/repo/seeds.exs` —
-there is no connection to real airline schedules, fares, or seat availability.
-Selling real flights means one of:
+**This is the biggest open gap and is only partially started.** The app
+still sells seats on flights created by hand through `/admin` or
+`priv/repo/seeds.exs` — the booking/checkout flow has no connection to real
+airline schedules, fares, or seat availability yet.
 
-- Integrating a GDS/NDC aggregator (e.g. Duffel, Amadeus for Developers,
-  Travelport) — each requires its own business application, contract, and
-  API credentials, and a non-trivial amount of new code (a `Flights.Supplier`
-  adapter, most likely, mirroring how `Payments` already abstracts over a
-  real/stub client).
-- Or deliberately keeping this as an admin-curated flight list (a smaller
-  operator model) — in which case this item is done as-is, and the rest of
-  this checklist is what actually matters.
+What exists so far: `AlbertAirline.Flights.Supplier` — a search-only adapter
+for real flight offers and seat maps against Duffel
+(`AlbertAirline.Flights.Supplier.DuffelClient`), mirroring how `Payments`
+abstracts over a real/stub client. It is **not wired into anything** —
+`AlbertAirline.Bookings`'s seat-claim transaction still operates entirely on
+local `AlbertAirline.Flights.Seat` rows, and no LiveView calls `Supplier`.
+Remaining to actually sell real flights:
+
+- [ ] Get a Duffel test access token (`DUFFEL_API_KEY`, free, no business
+      verification required — see README.md) and validate `DuffelClient`'s
+      response parsing against a real sandbox response; it was built
+      against Duffel's published schema only, not exercised live.
+- [ ] Decide how supplier offers replace or coexist with admin-curated
+      flights in flight search/listing.
+- [ ] Redesign the seat-claim transaction: it currently relies on a
+      partial unique index on `bookings.seat_id` against a permanent local
+      seat row. Duffel offers/seat maps expire (typically ~20-30 minutes)
+      and aren't local rows — booking a real seat means creating an Order
+      against Duffel inside (or coordinated with) the payment flow, not
+      claiming a local row.
+- [ ] Apply for Duffel production access (business verification, banking
+      details for settlement) once ready to move off `duffel_test_...`.
+- Or deliberately keep this as an admin-curated flight list (a smaller
+  operator model) — in which case the `Supplier` adapter above is optional
+  scaffolding, not a requirement, and the rest of this checklist is what
+  actually matters.
 
 Decide which model this is before treating anything else here as "launch
 readiness."
