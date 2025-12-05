@@ -27,6 +27,12 @@ config :albert_airline, AlbertAirlineWeb.Endpoint,
 # sessions in dev/prod. Not required in :test, which uses a stub adapter.
 config :albert_airline, :stripe_secret_key, System.get_env("STRIPE_SECRET_KEY")
 
+# A Duffel test-mode access token (duffel_test_...), needed for real flight
+# search/seat-map lookups via AlbertAirline.Flights.Supplier.DuffelClient.
+# Not required in :test, which uses a stub adapter, nor to run the app at
+# all today — nothing in the booking flow calls this yet (GO_LIVE.md item 1).
+config :albert_airline, :duffel_api_key, System.get_env("DUFFEL_API_KEY")
+
 if config_env() == :dev do
   # Reload browser tabs when matching files change.
   config :albert_airline, AlbertAirlineWeb.Endpoint,
