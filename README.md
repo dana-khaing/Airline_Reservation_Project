@@ -55,6 +55,7 @@ Seed data creates two accounts:
 | Variable            | Required in    | Purpose                                              |
 |----------------------|----------------|-------------------------------------------------------|
 | `STRIPE_SECRET_KEY`  | dev, prod      | Stripe test-mode secret key (`sk_test_...`) for real checkout sessions. Not required in `test`, which uses `AlbertAirline.Payments.StubClient`. Get one from your own [Stripe dashboard](https://dashboard.stripe.com/test/apikeys) — no live Stripe account exists for this project. |
+| `DUFFEL_API_KEY`     | dev, prod (optional) | Duffel test-mode access token (`duffel_test_...`) for `AlbertAirline.Flights.Supplier.DuffelClient` — real flight-offer search and seat maps. Not required to run the app: nothing in the booking flow calls this yet (see GO_LIVE.md item 1). Not required in `test`, which uses `AlbertAirline.Flights.Supplier.StubClient`. Get one from a free [Duffel account](https://duffel.com) — no business verification needed for test access. |
 | `DATABASE_URL`       | prod           | `ecto://USER:PASS@HOST/DATABASE`                      |
 | `SECRET_KEY_BASE`    | prod           | Generate with `mix phx.gen.secret`                    |
 | `PHX_HOST`           | prod           | Public hostname (e.g. `albert-airline.fly.dev`)        |
