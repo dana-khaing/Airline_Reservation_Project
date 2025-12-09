@@ -32,6 +32,15 @@ config :albert_airline, :payments_adapter, AlbertAirline.Payments.StubClient
 # In test we never call the real Duffel API
 config :albert_airline, :flights_supplier_adapter, AlbertAirline.Flights.Supplier.StubClient
 
+# In test we never call the real Aviationstack API
+config :albert_airline, :flight_status_adapter, AlbertAirline.FlightStatus.StubClient
+
+# Routes AviationstackClient's Req calls through a Req.Test stub instead of
+# the network, for aviationstack_client_test.exs (which exercises the real
+# client directly, bypassing the stub adapter above).
+config :albert_airline, :aviationstack_client_req_options,
+  plug: {Req.Test, AlbertAirline.FlightStatus.AviationstackClient}
+
 # Off by default in test — unrelated tests sharing one conn/peer IP would
 # otherwise trip each other's rate limits during a fast automated run.
 # Individual tests can flip this on to test the mechanism itself.
