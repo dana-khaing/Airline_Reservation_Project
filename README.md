@@ -31,6 +31,11 @@ viewer for free. See `AlbertAirline.Flights.subscribe_to_seats/1` and
 - **`AlbertAirline.Payments`** — dispatches to a configured adapter: the real
   `StripeClient` (REST calls via `Req`) in dev/prod, a network-free `StubClient` in
   test.
+- **`AlbertAirline.FlightStatus`** — dispatches to a configured adapter: the real
+  `AviationstackClient` (REST calls via `Req`) in dev/prod, a network-free `StubClient`
+  in test. Live status (scheduled/active/landed, delay, gate) is briefly cached
+  (`FlightStatus.Cache`, ETS-backed) to conserve the free-tier API quota, and shown on
+  the booking confirmation page and `/bookings/:id`.
 - **`AlbertAirline.Contact`** — the public contact form (no login required).
 - Admin UI at `/admin` (CRUD for airports/airlines/flights, gated by `is_admin`).
 
@@ -56,6 +61,7 @@ Seed data creates two accounts:
 |----------------------|----------------|-------------------------------------------------------|
 | `STRIPE_SECRET_KEY`  | dev, prod      | Stripe test-mode secret key (`sk_test_...`) for real checkout sessions. Not required in `test`, which uses `AlbertAirline.Payments.StubClient`. Get one from your own [Stripe dashboard](https://dashboard.stripe.com/test/apikeys) — no live Stripe account exists for this project. |
 | `DUFFEL_API_KEY`     | dev, prod (optional) | Duffel test-mode access token (`duffel_test_...`) for `AlbertAirline.Flights.Supplier.DuffelClient` — real flight-offer search and seat maps. Not required to run the app: nothing in the booking flow calls this yet (see GO_LIVE.md item 1). Not required in `test`, which uses `AlbertAirline.Flights.Supplier.StubClient`. Get one from a free [Duffel account](https://duffel.com) — no business verification needed for test access. |
+| `AVIATIONSTACK_API_KEY` | dev, prod (optional) | Aviationstack free-tier API key for `AlbertAirline.FlightStatus.AviationstackClient` — live flight-status lookups (scheduled/active/landed, delay, gate) shown on the booking confirmation and `/bookings/:id` pages. Not required to run the app: without it, the status panel just shows "Live tracking unavailable." Not required in `test`, which uses `AlbertAirline.FlightStatus.StubClient`. Get one from a free [Aviationstack account](https://aviationstack.com) — note the free tier is HTTP-only and rate-limited. |
 | `DATABASE_URL`       | prod           | `ecto://USER:PASS@HOST/DATABASE`                      |
 | `SECRET_KEY_BASE`    | prod           | Generate with `mix phx.gen.secret`                    |
 | `PHX_HOST`           | prod           | Public hostname (e.g. `albert-airline.fly.dev`)        |
@@ -67,6 +73,13 @@ See [`GO_LIVE.md`](GO_LIVE.md) for the full checklist of what's left before this
 can serve real customers/bookings — most of it is exactly this table: real
 accounts and credentials for Stripe, Resend, Sentry, and Fly.io that only the
 project owner can create.
+
+Most seeded flights (`priv/repo/seeds.exs`) use fictional flight numbers on fixed
+future dates and will never get a live Aviationstack match by design — that's expected,
+not a bug (the status panel just shows "unavailable" for them). One flight is seeded
+specifically to demo a real match: a real airline on a dynamically computed near-term
+date, with a placeholder flight number flagged in a comment for verification against a
+real timetable before relying on it live.
 
 ## Testing
 

@@ -77,6 +77,28 @@ airlines =
 
 [albert, kbz, mai, thai] = airlines
 
+# A real airline ("Thai Airways", already seeded above) + a real (at time
+# of writing) flight number, on a dynamically computed near-term date —
+# unlike every fixed-future-date flight below, which is deliberately
+# fictional and will never get a live match from a real flight-status API.
+# This is the one flight meant to demo an actual live Aviationstack match
+# (see AlbertAirline.FlightStatus) whenever `mix ecto.setup` runs.
+#
+# IMPORTANT: "TG-XXX" below is a placeholder, not a confirmed flight
+# number. Real airline schedules — which flight numbers/aircraft serve a
+# given route, and at what time — change over time and were not verified
+# against a live source while writing this seed. Before relying on this
+# for a live demo: look up Thai Airways' current published timetable (or
+# a flight-tracking site) for a real, currently-operating BKK<->LHR
+# flight number and departure time, and update both flight_number below
+# and the departure clock time in live_departure to match. Also verify
+# empirically how close to "now" Aviationstack's free real-time endpoint
+# needs the date to be for a match — 1 day out is a starting guess, not a
+# guarantee.
+live_departure_date = Date.add(Date.utc_today(), 1)
+live_departure = DateTime.new!(live_departure_date, ~T[23:40:00], "Etc/UTC")
+live_arrival = DateTime.add(live_departure, 12 * 60 * 60)
+
 flight_specs = [
   %{
     flight_number: "A8-101",
@@ -149,6 +171,18 @@ flight_specs = [
     base_price: "945.00",
     stops: 1,
     already_booked_seats: ~w(1B 1D 6A 6B)
+  },
+  %{
+    flight_number: "TG-XXX",
+    airline: thai,
+    departure_airport: bkk,
+    arrival_airport: lhr,
+    departure_time: live_departure,
+    arrival_time: live_arrival,
+    aircraft: "Airbus A350-900",
+    base_price: "999.00",
+    stops: 0,
+    already_booked_seats: []
   }
 ]
 
