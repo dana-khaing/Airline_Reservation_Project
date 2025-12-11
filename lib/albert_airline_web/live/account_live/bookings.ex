@@ -87,6 +87,12 @@ defmodule AlbertAirlineWeb.AccountLive.Bookings do
         <div class="text-sm text-black/70">
           Confirmation: <span class="font-mono">{@booking.confirmation_code}</span>
         </div>
+        <.link
+          navigate={~p"/bookings/#{@booking.id}"}
+          class="mt-2 inline-block text-sm font-semibold text-[#2563eb] hover:underline"
+        >
+          {if @cancellable, do: "Track flight status →", else: "View booking →"}
+        </.link>
       </div>
       <button
         :if={@cancellable}
