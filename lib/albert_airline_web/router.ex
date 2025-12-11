@@ -52,20 +52,11 @@ defmodule AlbertAirlineWeb.Router do
 
   ## Authentication routes
 
-  scope "/", AlbertAirlineWeb do
-    pipe_through [:browser, :require_authenticated_user]
-
-    live_session :require_authenticated_user,
-      on_mount: [{AlbertAirlineWeb.UserAuth, :require_authenticated}] do
-      live "/users/settings", UserLive.Settings, :edit
-      live "/users/settings/confirm-email/:token", UserLive.Settings, :confirm_email
-      live "/account", AccountLive.Bookings, :index
-      live "/bookings/:id", BookingLive.Show, :show
-    end
-
-    post "/users/update-password", UserSessionController, :update_password
-  end
-
+  # This scope must stay declared before the :require_authenticated_user
+  # scope below — Phoenix matches routes in declaration order, and the
+  # literal "/bookings/confirm" here needs to win over that scope's dynamic
+  # "/bookings/:id", or "confirm" gets captured as an :id (and the route
+  # incorrectly ends up behind a login wall).
   scope "/", AlbertAirlineWeb do
     pipe_through [:browser]
 
@@ -82,6 +73,20 @@ defmodule AlbertAirlineWeb.Router do
 
     post "/users/log-in", UserSessionController, :create
     delete "/users/log-out", UserSessionController, :delete
+  end
+
+  scope "/", AlbertAirlineWeb do
+    pipe_through [:browser, :require_authenticated_user]
+
+    live_session :require_authenticated_user,
+      on_mount: [{AlbertAirlineWeb.UserAuth, :require_authenticated}] do
+      live "/users/settings", UserLive.Settings, :edit
+      live "/users/settings/confirm-email/:token", UserLive.Settings, :confirm_email
+      live "/account", AccountLive.Bookings, :index
+      live "/bookings/:id", BookingLive.Show, :show
+    end
+
+    post "/users/update-password", UserSessionController, :update_password
   end
 
   ## Admin routes
