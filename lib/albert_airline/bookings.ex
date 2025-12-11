@@ -44,6 +44,22 @@ defmodule AlbertAirline.Bookings do
   def get_booking!(id), do: Repo.get!(Booking, id)
 
   @doc """
+  Gets a single booking scoped to the given user, with seat/flight/airline/
+  airport data preloaded for display. Raises `Ecto.NoResultsError` (the
+  standard 404, same as `AlbertAirline.Flights.get_flight!/1`) if the
+  booking doesn't exist *or* belongs to someone else — so a booking id in
+  the URL can't be used to view another user's booking.
+  """
+  def get_booking_for_user!(id, user_id) do
+    Repo.one!(
+      from(b in Booking,
+        where: b.id == ^id and b.user_id == ^user_id,
+        preload: [:seat, flight: [:airline, :departure_airport, :arrival_airport]]
+      )
+    )
+  end
+
+  @doc """
   Creates a booking.
 
   ## Examples

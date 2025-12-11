@@ -2,7 +2,11 @@ defmodule AlbertAirlineWeb.BookingLive.Confirmation do
   use AlbertAirlineWeb, :live_view
 
   alias AlbertAirline.Bookings
+  alias AlbertAirline.FlightStatus
   alias AlbertAirline.Repo
+  alias AlbertAirlineWeb.FlightStatusComponents
+
+  @refresh_interval :timer.seconds(60)
 
   @impl true
   def mount(%{"session_id" => session_id}, _session, socket) do
@@ -15,7 +19,14 @@ defmodule AlbertAirlineWeb.BookingLive.Confirmation do
               flight: [:airline, :departure_airport, :arrival_airport]
             ])
 
-          assign(socket, status: :confirmed, bookings: bookings)
+          [first | _] = bookings
+          if connected?(socket), do: schedule_refresh()
+
+          socket
+          |> assign(status: :confirmed, bookings: bookings)
+          |> assign_async(:flight_status, fn ->
+            {:ok, %{flight_status: FlightStatus.get_status(first.flight)}}
+          end)
 
         {:error, :seat_conflict} ->
           assign(socket, status: :seat_conflict)
@@ -35,11 +46,28 @@ defmodule AlbertAirlineWeb.BookingLive.Confirmation do
   end
 
   @impl true
+  def handle_info(:refresh_flight_status, socket) do
+    schedule_refresh()
+    [first | _] = socket.assigns.bookings
+
+    {:noreply,
+     assign_async(socket, :flight_status, fn ->
+       {:ok, %{flight_status: FlightStatus.get_status(first.flight)}}
+     end)}
+  end
+
+  defp schedule_refresh, do: Process.send_after(self(), :refresh_flight_status, @refresh_interval)
+
+  @impl true
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash} current_scope={@current_scope}>
       <div class="albert-card mx-auto max-w-2xl text-center">
-        <.confirmed :if={@status == :confirmed} bookings={@bookings} />
+        <.confirmed
+          :if={@status == :confirmed}
+          bookings={@bookings}
+          flight_status={@flight_status}
+        />
 
         <div :if={@status == :seat_conflict}>
           <h2 class="text-2xl font-bold">We're sorry</h2>
@@ -71,6 +99,7 @@ defmodule AlbertAirlineWeb.BookingLive.Confirmation do
   end
 
   attr :bookings, :list, required: true
+  attr :flight_status, Phoenix.LiveView.AsyncResult, required: true
 
   defp confirmed(assigns) do
     [first | _] = assigns.bookings
@@ -99,6 +128,8 @@ defmodule AlbertAirlineWeb.BookingLive.Confirmation do
       <p class="mt-4 text-lg font-bold">
         Total paid: ${Enum.reduce(@bookings, Decimal.new(0), &Decimal.add(&1.total_price, &2))}
       </p>
+
+      <FlightStatusComponents.flight_status status={@flight_status} class="mt-6" />
     </div>
     """
   end
