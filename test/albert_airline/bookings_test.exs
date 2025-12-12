@@ -110,4 +110,39 @@ defmodule AlbertAirline.BookingsTest do
       assert %{seat_id: ["has already been taken"]} = errors_on(changeset)
     end
   end
+
+  describe "resilience to Payments adapter failures" do
+    setup do
+      previous = Application.get_env(:albert_airline, :payments_adapter)
+
+      Application.put_env(
+        :albert_airline,
+        :payments_adapter,
+        AlbertAirline.Payments.RaisingClient
+      )
+
+      on_exit(fn ->
+        Application.put_env(:albert_airline, :payments_adapter, previous)
+      end)
+    end
+
+    test "start_checkout/5 returns an error instead of crashing when Payments raises" do
+      flight = AlbertAirline.FlightsFixtures.flight_fixture()
+      seat = AlbertAirline.FlightsFixtures.seat_fixture(%{flight_id: flight.id})
+      user = AlbertAirline.AccountsFixtures.user_fixture()
+
+      assert {:error, _reason} =
+               Bookings.start_checkout(
+                 user,
+                 flight,
+                 [seat.id],
+                 "https://example.com/ok",
+                 "https://example.com/cancel"
+               )
+    end
+
+    test "confirm_from_stripe_session/1 returns an error instead of crashing when Payments raises" do
+      assert {:error, _reason} = Bookings.confirm_from_stripe_session("cs_test_whatever")
+    end
+  end
 end
