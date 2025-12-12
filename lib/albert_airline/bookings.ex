@@ -157,6 +157,10 @@ defmodule AlbertAirline.Bookings do
         "seat_ids" => Enum.join(seat_ids, ",")
       }
     })
+  rescue
+    error ->
+      Logger.error("Failed to start checkout: #{inspect(error)}")
+      {:error, error}
   end
 
   @doc """
@@ -180,6 +184,10 @@ defmodule AlbertAirline.Bookings do
         existing -> {:ok, existing}
       end
     end
+  rescue
+    error ->
+      Logger.error("Failed to confirm checkout session #{session_id}: #{inspect(error)}")
+      {:error, error}
   end
 
   defp do_confirm(%{payment_status: "paid"} = session, confirmation_code) do
