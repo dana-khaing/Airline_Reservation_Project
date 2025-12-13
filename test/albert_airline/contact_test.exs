@@ -9,7 +9,7 @@ defmodule AlbertAirline.ContactTest do
     import AlbertAirline.AccountsFixtures, only: [user_fixture: 0]
     import AlbertAirline.ContactFixtures
 
-    @invalid_attrs %{first_name: nil, last_name: nil, company_name: nil, email: nil}
+    @invalid_attrs %{first_name: nil, last_name: nil, company_name: nil, email: nil, message: nil}
 
     test "list_contact_messages/0 returns messages newest first" do
       older = message_fixture()
@@ -22,7 +22,8 @@ defmodule AlbertAirline.ContactTest do
         first_name: "Jane",
         last_name: "Doe",
         company_name: "Acme",
-        email: "jane@example.com"
+        email: "jane@example.com",
+        message: "I'd like to ask about group bookings."
       }
 
       assert {:ok, %Message{} = message} = Contact.create_message(valid_attrs)
@@ -30,6 +31,7 @@ defmodule AlbertAirline.ContactTest do
       assert message.last_name == "Doe"
       assert message.company_name == "Acme"
       assert message.email == "jane@example.com"
+      assert message.message == "I'd like to ask about group bookings."
       assert message.user_id == nil
     end
 
@@ -39,7 +41,8 @@ defmodule AlbertAirline.ContactTest do
       valid_attrs = %{
         first_name: "Jane",
         last_name: "Doe",
-        email: "jane@example.com"
+        email: "jane@example.com",
+        message: "Question about my booking."
       }
 
       assert {:ok, %Message{} = message} = Contact.create_message(valid_attrs, user.id)
@@ -53,6 +56,7 @@ defmodule AlbertAirline.ContactTest do
         first_name: "Jane",
         last_name: "Doe",
         email: "jane@example.com",
+        message: "Question about my booking.",
         user_id: other_user.id
       }
 
@@ -60,13 +64,14 @@ defmodule AlbertAirline.ContactTest do
       assert message.user_id == nil
     end
 
-    test "create_message/1 requires first name, last name, and email" do
+    test "create_message/1 requires first name, last name, email, and message" do
       assert {:error, changeset} = Contact.create_message(@invalid_attrs)
 
       assert %{
                first_name: ["can't be blank"],
                last_name: ["can't be blank"],
-               email: ["can't be blank"]
+               email: ["can't be blank"],
+               message: ["can't be blank"]
              } =
                errors_on(changeset)
     end
@@ -76,7 +81,8 @@ defmodule AlbertAirline.ContactTest do
                Contact.create_message(%{
                  first_name: "Jane",
                  last_name: "Doe",
-                 email: "not-an-email"
+                 email: "not-an-email",
+                 message: "Hello"
                })
 
       assert %{email: ["must have the @ sign and no spaces"]} = errors_on(changeset)

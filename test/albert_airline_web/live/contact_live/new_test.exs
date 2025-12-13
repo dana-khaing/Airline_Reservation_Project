@@ -16,7 +16,8 @@ defmodule AlbertAirlineWeb.ContactLive.NewTest do
           "first_name" => "Jane",
           "last_name" => "Doe",
           "company_name" => "Acme",
-          "email" => "jane@example.com"
+          "email" => "jane@example.com",
+          "message" => "I'd like to ask about group bookings."
         }
       })
       |> render_submit()
@@ -25,6 +26,7 @@ defmodule AlbertAirlineWeb.ContactLive.NewTest do
     assert [message] = Contact.list_contact_messages()
     assert message.first_name == "Jane"
     assert message.email == "jane@example.com"
+    assert message.message == "I'd like to ask about group bookings."
     assert message.user_id == nil
   end
 
@@ -36,7 +38,8 @@ defmodule AlbertAirlineWeb.ContactLive.NewTest do
       "message" => %{
         "first_name" => "Anon",
         "last_name" => "Ymous",
-        "email" => "anon@example.com"
+        "email" => "anon@example.com",
+        "message" => "Hello there."
       }
     })
     |> render_submit()
@@ -56,7 +59,8 @@ defmodule AlbertAirlineWeb.ContactLive.NewTest do
       "message" => %{
         "first_name" => "Log",
         "last_name" => "GedIn",
-        "email" => "loggedin@example.com"
+        "email" => "loggedin@example.com",
+        "message" => "Hello there."
       }
     })
     |> render_submit()
@@ -77,6 +81,7 @@ defmodule AlbertAirlineWeb.ContactLive.NewTest do
         "first_name" => "Anon",
         "last_name" => "Ymous",
         "email" => "anon@example.com",
+        "message" => "Hello there.",
         "user_id" => to_string(victim.id)
       }
     })

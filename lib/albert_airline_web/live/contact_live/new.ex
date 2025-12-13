@@ -105,6 +105,12 @@ defmodule AlbertAirlineWeb.ContactLive.New do
             label="Email :"
             class="w-full rounded border border-black/40 px-2 py-1"
           />
+          <.input
+            field={@form[:message]}
+            type="textarea"
+            label="Message :"
+            class="w-full rounded border border-black/40 px-2 py-1"
+          />
 
           <button
             type="submit"
