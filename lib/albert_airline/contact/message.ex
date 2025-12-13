@@ -7,6 +7,7 @@ defmodule AlbertAirline.Contact.Message do
     field :last_name, :string
     field :company_name, :string
     field :email, :string
+    field :message, :string
 
     belongs_to :user, AlbertAirline.Accounts.User
 
@@ -16,8 +17,8 @@ defmodule AlbertAirline.Contact.Message do
   @doc false
   def changeset(message, attrs) do
     message
-    |> cast(attrs, [:first_name, :last_name, :company_name, :email])
-    |> validate_required([:first_name, :last_name, :email])
+    |> cast(attrs, [:first_name, :last_name, :company_name, :email, :message])
+    |> validate_required([:first_name, :last_name, :email, :message])
     |> validate_format(:email, ~r/^[^@,;\s]+@[^@,;\s]+$/,
       message: "must have the @ sign and no spaces"
     )
@@ -25,6 +26,7 @@ defmodule AlbertAirline.Contact.Message do
     |> validate_length(:last_name, max: 160)
     |> validate_length(:company_name, max: 160)
     |> validate_length(:email, max: 160)
+    |> validate_length(:message, max: 5000)
     |> foreign_key_constraint(:user_id)
   end
 end

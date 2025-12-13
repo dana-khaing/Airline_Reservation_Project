@@ -13,7 +13,8 @@ defmodule AlbertAirline.ContactFixtures do
         company_name: "Some Company",
         email: "someone#{System.unique_integer([:positive])}@example.com",
         first_name: "Some",
-        last_name: "Body"
+        last_name: "Body",
+        message: "Some message"
       })
 
     {:ok, message} = AlbertAirline.Contact.create_message(attrs)
