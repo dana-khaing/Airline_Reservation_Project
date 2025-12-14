@@ -125,6 +125,20 @@ defmodule AlbertAirlineWeb.FlightLive.ShowTest do
     assert button_tag(html, seat.id) =~ ~s(aria-pressed="true")
   end
 
+  test "a stray/unexpected message to the LiveView process is a no-op, not a crash", %{
+    conn: conn,
+    flight: flight
+  } do
+    {:ok, lv, _html} = live(conn, ~p"/flights/#{flight.id}")
+
+    send(lv.pid, :some_unrelated_message)
+
+    # If handle_info/2 had no catch-all, the message above would have
+    # raised FunctionClauseError and killed the LiveView process — the
+    # view still responding here proves it survived.
+    assert render(lv) =~ flight.flight_number
+  end
+
   defp button_tag(html, seat_id) do
     [tag] = Regex.run(~r/<button[^>]*phx-value-id="#{seat_id}"[^>]*>/, html)
     tag

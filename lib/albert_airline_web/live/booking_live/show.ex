@@ -33,6 +33,12 @@ defmodule AlbertAirlineWeb.BookingLive.Show do
      end)}
   end
 
+  # See the identical comment in BookingLive.Confirmation.handle_info/2 —
+  # same landmine, same fix: a stray :refresh_flight_status arriving after
+  # this process has been reused by another LiveView must not crash it.
+  @impl true
+  def handle_info(_message, socket), do: {:noreply, socket}
+
   defp schedule_refresh, do: Process.send_after(self(), :refresh_flight_status, @refresh_interval)
 
   defp upcoming?(booking),

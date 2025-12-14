@@ -96,6 +96,15 @@ defmodule AlbertAirlineWeb.FlightLive.Show do
     {:noreply, socket}
   end
 
+  # LiveView reuses one BEAM process across `navigate`-linked views in the
+  # same live_session, so if a stray seat-broadcast arrives after this
+  # process has since been replaced by another LiveView, an unmatched
+  # handle_info/2 clause would crash that process with a
+  # FunctionClauseError. This catch-all keeps any such stray message a
+  # harmless no-op.
+  @impl true
+  def handle_info(_message, socket), do: {:noreply, socket}
+
   defp maybe_drop_now_unavailable_seat(socket, %{status: "available"}), do: socket
 
   defp maybe_drop_now_unavailable_seat(socket, updated_seat) do

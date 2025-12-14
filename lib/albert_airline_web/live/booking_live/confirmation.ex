@@ -56,6 +56,15 @@ defmodule AlbertAirlineWeb.BookingLive.Confirmation do
      end)}
   end
 
+  # LiveView reuses one BEAM process across `navigate`-linked views in the
+  # same live_session, so if a stray :refresh_flight_status message from
+  # this view arrives after it's since been replaced by another LiveView
+  # mounted on the same process, an unmatched handle_info/2 clause would
+  # crash that process with a FunctionClauseError. This catch-all keeps
+  # any such stray message a harmless no-op.
+  @impl true
+  def handle_info(_message, socket), do: {:noreply, socket}
+
   defp schedule_refresh, do: Process.send_after(self(), :refresh_flight_status, @refresh_interval)
 
   @impl true
