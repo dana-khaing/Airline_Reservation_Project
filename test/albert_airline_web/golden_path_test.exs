@@ -78,10 +78,13 @@ defmodule AlbertAirlineWeb.GoldenPathTest do
     assert account_html =~ seat.label
 
     # 7. clicking through to the persistent booking-detail page also works
-    # ("/account" and "/bookings/:id" share the require_authenticated_user
-    # live_session, so this is a same-session live navigation, not a full
-    # page load).
-    detail_html = account_lv |> element("a", "Track flight status") |> render_click()
+    # (a live_redirect, since it's a <.link navigate=...>, not a phx-click)
+    assert {:ok, _detail_lv, detail_html} =
+             account_lv
+             |> element("a", "Track flight status")
+             |> render_click()
+             |> follow_redirect(conn)
+
     assert detail_html =~ "AB-777"
   end
 end
