@@ -20,6 +20,31 @@ defmodule AlbertAirline.BookingsTest do
       assert Bookings.get_booking!(booking.id) == booking
     end
 
+    test "get_booking_for_user!/2 returns the booking when it belongs to the given user" do
+      user = AlbertAirline.AccountsFixtures.user_fixture()
+      booking = booking_fixture(%{user_id: user.id})
+
+      assert Bookings.get_booking_for_user!(booking.id, user.id).id == booking.id
+    end
+
+    test "get_booking_for_user!/2 raises when the booking belongs to a different user" do
+      owner = AlbertAirline.AccountsFixtures.user_fixture()
+      other_user = AlbertAirline.AccountsFixtures.user_fixture()
+      booking = booking_fixture(%{user_id: owner.id})
+
+      assert_raise Ecto.NoResultsError, fn ->
+        Bookings.get_booking_for_user!(booking.id, other_user.id)
+      end
+    end
+
+    test "get_booking_for_user!/2 raises when the booking id doesn't exist" do
+      user = AlbertAirline.AccountsFixtures.user_fixture()
+
+      assert_raise Ecto.NoResultsError, fn ->
+        Bookings.get_booking_for_user!(-1, user.id)
+      end
+    end
+
     test "create_booking/1 with valid data creates a booking" do
       seat = AlbertAirline.FlightsFixtures.seat_fixture()
       flight = AlbertAirline.FlightsFixtures.flight_fixture()

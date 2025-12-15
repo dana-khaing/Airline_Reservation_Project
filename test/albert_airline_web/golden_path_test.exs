@@ -73,8 +73,15 @@ defmodule AlbertAirlineWeb.GoldenPathTest do
     assert other_html =~ "disabled"
 
     # 6. and the booking shows up in the buyer's own history
-    {:ok, _account_lv, account_html} = live(conn, ~p"/account")
+    {:ok, account_lv, account_html} = live(conn, ~p"/account")
     assert account_html =~ "AB-777"
     assert account_html =~ seat.label
+
+    # 7. clicking through to the persistent booking-detail page also works
+    # ("/account" and "/bookings/:id" share the require_authenticated_user
+    # live_session, so this is a same-session live navigation, not a full
+    # page load).
+    detail_html = account_lv |> element("a", "Track flight status") |> render_click()
+    assert detail_html =~ "AB-777"
   end
 end
