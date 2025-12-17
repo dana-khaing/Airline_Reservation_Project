@@ -115,6 +115,13 @@ Noted in their originating PRs, listed again so they're not forgotten:
       pass and deliberately left alone — extracting a shared abstraction for
       3 call sites risked being premature. Worth revisiting only if a 4th
       similar form gets added.
+- [ ] **Validate `AviationstackClient` against a real response**: like
+      `DuffelClient` above, `AlbertAirline.FlightStatus.AviationstackClient`
+      was built and tested against `Req.Test`-stubbed responses only — no
+      live Aviationstack credentials are available in this environment, so
+      its parsing has not been exercised against the real API. Get a free
+      key (`AVIATIONSTACK_API_KEY`, see README.md) and validate before
+      relying on the live flight-status panel for a demo.
 
 ## 5. Operational basics
 
