@@ -11,6 +11,18 @@ defmodule AlbertAirlineWeb.Router do
     plug :protect_from_forgery
     plug :put_secure_browser_headers
     plug :fetch_current_scope_for_user
+    plug :fetch_cookies
+    plug :put_theme
+  end
+
+  # Resolves the dark/light theme server-side from a cookie the theme
+  # toggle sets client-side (see AlbertAirlineWeb.Layouts.theme_toggle/1),
+  # so the very first response already carries the right data-theme
+  # attribute — no inline script / flash-of-wrong-theme needed. Defaults
+  # to "light" for a visitor who has never toggled.
+  defp put_theme(conn, _opts) do
+    theme = if conn.cookies["theme"] == "dark", do: "dark", else: "light"
+    assign(conn, :theme, theme)
   end
 
   pipeline :api do
