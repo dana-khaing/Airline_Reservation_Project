@@ -8,12 +8,11 @@ defmodule AlbertAirlineWeb.CoreComponents do
   with doc strings and declarative assigns. You may customize and style
   them in any way you want, based on your application growth and needs.
 
-  The foundation for styling is Tailwind CSS, a utility-first CSS framework,
-  augmented with daisyUI, a Tailwind CSS plugin that provides UI components
-  and themes. Here are useful references:
-
-    * [daisyUI](https://daisyui.com/docs/intro/) - a good place to get
-      started and see the available components.
+  The foundation for styling is Tailwind CSS, a utility-first CSS framework.
+  Every component here is hand-rolled against this app's own design tokens
+  (`--color-brand-*`, `--color-neutral-*`, `--surface`/`--text-*`/etc,
+  defined in `assets/css/app.css`) rather than a component-library plugin —
+  see AGENTS.md. Here are useful references:
 
     * [Tailwind CSS](https://tailwindcss.com) - the foundational framework
       we build on. You will use it for layout, sizing, flexbox, grid, and
@@ -63,13 +62,15 @@ defmodule AlbertAirlineWeb.CoreComponents do
       id={@id}
       phx-click={JS.push("lv:clear-flash", value: %{key: @kind}) |> hide("##{@id}")}
       role="alert"
-      class="toast toast-top toast-end z-50"
+      class="fixed top-4 right-4 z-50 w-80 max-w-[calc(100vw-2rem)] sm:w-96"
       {@rest}
     >
       <div class={[
-        "alert w-80 sm:w-96 max-w-80 sm:max-w-96 text-wrap",
-        @kind == :info && "alert-info",
-        @kind == :error && "alert-error"
+        "flex items-start gap-3 rounded-lg border p-4 text-sm shadow-md",
+        @kind == :info &&
+          "border-info-500/30 bg-info-100 text-info-800 dark:border-info-500/40 dark:bg-info-800/20 dark:text-info-100",
+        @kind == :error &&
+          "border-error-500/30 bg-error-100 text-error-800 dark:border-error-500/40 dark:bg-error-800/20 dark:text-error-100"
       ]}>
         <.icon :if={@kind == :info} name="hero-information-circle" class="size-5 shrink-0" />
         <.icon :if={@kind == :error} name="hero-exclamation-circle" class="size-5 shrink-0" />
@@ -97,15 +98,29 @@ defmodule AlbertAirlineWeb.CoreComponents do
   """
   attr :rest, :global, include: ~w(href navigate patch method download name value disabled)
   attr :class, :any
-  attr :variant, :string, values: ~w(primary)
+  attr :variant, :string, values: ~w(primary secondary ghost danger)
   slot :inner_block, required: true
 
   def button(%{rest: rest} = assigns) do
-    variants = %{"primary" => "btn-primary", nil => "btn-primary btn-soft"}
+    base =
+      "inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium " <>
+        "transition-colors focus-visible:outline-none focus-visible:ring-2 " <>
+        "focus-visible:ring-brand-500/40 disabled:pointer-events-none disabled:opacity-50"
+
+    variants = %{
+      "primary" =>
+        "bg-brand-600 text-white hover:bg-brand-700 dark:bg-brand-500 dark:hover:bg-brand-400",
+      "secondary" =>
+        "border border-(--border-default) bg-(--surface) text-(--text-default) hover:bg-(--surface-muted)",
+      "ghost" => "text-(--text-default) hover:bg-(--surface-muted)",
+      "danger" => "bg-error-500 text-white hover:bg-error-800",
+      nil =>
+        "bg-brand-50 text-brand-700 hover:bg-brand-100 dark:bg-brand-950 dark:text-brand-300 dark:hover:bg-brand-900"
+    }
 
     assigns =
       assign_new(assigns, :class, fn ->
-        ["btn", Map.fetch!(variants, assigns[:variant])]
+        [base, Map.fetch!(variants, assigns[:variant])]
       end)
 
     if rest[:href] || rest[:navigate] || rest[:patch] do
@@ -212,8 +227,8 @@ defmodule AlbertAirlineWeb.CoreComponents do
       end)
 
     ~H"""
-    <div class="fieldset mb-2">
-      <label for={@id}>
+    <div class="mb-2">
+      <label for={@id} class="flex items-center gap-2 text-sm text-(--text-default)">
         <input
           type="hidden"
           name={@name}
@@ -221,17 +236,18 @@ defmodule AlbertAirlineWeb.CoreComponents do
           disabled={@rest[:disabled]}
           form={@rest[:form]}
         />
-        <span class="label">
-          <input
-            type="checkbox"
-            id={@id}
-            name={@name}
-            value="true"
-            checked={@checked}
-            class={@class || "checkbox checkbox-sm"}
-            {@rest}
-          />{@label}
-        </span>
+        <input
+          type="checkbox"
+          id={@id}
+          name={@name}
+          value="true"
+          checked={@checked}
+          class={
+            @class ||
+              "size-4 rounded border-(--border-default) text-brand-600 focus:ring-2 focus:ring-brand-500/40"
+          }
+          {@rest}
+        />{@label}
       </label>
       <.error :for={msg <- @errors}>{msg}</.error>
     </div>
@@ -240,13 +256,15 @@ defmodule AlbertAirlineWeb.CoreComponents do
 
   def input(%{type: "select"} = assigns) do
     ~H"""
-    <div class="fieldset mb-2">
+    <div class="mb-2">
       <label for={@id}>
-        <span :if={@label} class="label mb-1">{@label}</span>
+        <span :if={@label} class="mb-1 block text-sm font-medium text-(--text-default)">
+          {@label}
+        </span>
         <select
           id={@id}
           name={@name}
-          class={[@class || "w-full select", @errors != [] && (@error_class || "select-error")]}
+          class={[@class || input_class(), @errors != [] && (@error_class || input_error_class())]}
           multiple={@multiple}
           {@rest}
         >
@@ -261,16 +279,15 @@ defmodule AlbertAirlineWeb.CoreComponents do
 
   def input(%{type: "textarea"} = assigns) do
     ~H"""
-    <div class="fieldset mb-2">
+    <div class="mb-2">
       <label for={@id}>
-        <span :if={@label} class="label mb-1">{@label}</span>
+        <span :if={@label} class="mb-1 block text-sm font-medium text-(--text-default)">
+          {@label}
+        </span>
         <textarea
           id={@id}
           name={@name}
-          class={[
-            @class || "w-full textarea",
-            @errors != [] && (@error_class || "textarea-error")
-          ]}
+          class={[@class || input_class(), @errors != [] && (@error_class || input_error_class())]}
           {@rest}
         >{Phoenix.HTML.Form.normalize_value("textarea", @value)}</textarea>
       </label>
@@ -282,18 +299,17 @@ defmodule AlbertAirlineWeb.CoreComponents do
   # All other inputs text, datetime-local, url, password, etc. are handled here...
   def input(assigns) do
     ~H"""
-    <div class="fieldset mb-2">
+    <div class="mb-2">
       <label for={@id}>
-        <span :if={@label} class="label mb-1">{@label}</span>
+        <span :if={@label} class="mb-1 block text-sm font-medium text-(--text-default)">
+          {@label}
+        </span>
         <input
           type={@type}
           name={@name}
           id={@id}
           value={Phoenix.HTML.Form.normalize_value(@type, @value)}
-          class={[
-            @class || "w-full input",
-            @errors != [] && (@error_class || "input-error")
-          ]}
+          class={[@class || input_class(), @errors != [] && (@error_class || input_error_class())]}
           {@rest}
         />
       </label>
@@ -302,10 +318,18 @@ defmodule AlbertAirlineWeb.CoreComponents do
     """
   end
 
+  defp input_class,
+    do:
+      "w-full rounded-md border border-(--border-default) bg-(--surface) px-3 py-2 text-sm " <>
+        "text-(--text-default) placeholder:text-(--text-muted) focus:border-brand-500 " <>
+        "focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+
+  defp input_error_class, do: "border-error-500 focus:border-error-500 focus:ring-error-500/20"
+
   # Helper used by inputs to generate form errors
   defp error(assigns) do
     ~H"""
-    <p class="mt-1.5 flex gap-2 items-center text-sm text-error">
+    <p class="mt-1.5 flex items-center gap-2 text-sm text-error-500">
       <.icon name="hero-exclamation-circle" class="size-5" />
       {render_slot(@inner_block)}
     </p>
@@ -323,10 +347,10 @@ defmodule AlbertAirlineWeb.CoreComponents do
     ~H"""
     <header class={[@actions != [] && "flex items-center justify-between gap-6", "pb-4"]}>
       <div>
-        <h1 class="text-lg font-semibold leading-8">
+        <h1 class="text-lg font-semibold leading-8 text-(--text-default)">
           {render_slot(@inner_block)}
         </h1>
-        <p :if={@subtitle != []} class="text-sm text-base-content/70">
+        <p :if={@subtitle != []} class="text-sm text-(--text-muted)">
           {render_slot(@subtitle)}
         </p>
       </div>
@@ -367,25 +391,31 @@ defmodule AlbertAirlineWeb.CoreComponents do
       end
 
     ~H"""
-    <table class="table table-zebra">
+    <table class="w-full text-left text-sm">
       <thead>
-        <tr>
-          <th :for={col <- @col}>{col[:label]}</th>
-          <th :if={@action != []}>
+        <tr class="border-b border-(--border-default)">
+          <th :for={col <- @col} class="px-3 py-2 font-semibold text-(--text-muted)">
+            {col[:label]}
+          </th>
+          <th :if={@action != []} class="px-3 py-2">
             <span class="sr-only">{gettext("Actions")}</span>
           </th>
         </tr>
       </thead>
       <tbody id={@id} phx-update={is_struct(@rows, Phoenix.LiveView.LiveStream) && "stream"}>
-        <tr :for={row <- @rows} id={@row_id && @row_id.(row)}>
+        <tr
+          :for={row <- @rows}
+          id={@row_id && @row_id.(row)}
+          class="border-b border-(--border-default) even:bg-(--surface-muted)"
+        >
           <td
             :for={col <- @col}
             phx-click={@row_click && @row_click.(row)}
-            class={@row_click && "hover:cursor-pointer"}
+            class={["px-3 py-2", @row_click && "hover:cursor-pointer"]}
           >
             {render_slot(col, @row_item.(row))}
           </td>
-          <td :if={@action != []} class="w-0 font-semibold">
+          <td :if={@action != []} class="w-0 px-3 py-2 font-semibold">
             <div class="flex gap-4">
               <%= for action <- @action do %>
                 {render_slot(action, @row_item.(row))}
@@ -414,12 +444,13 @@ defmodule AlbertAirlineWeb.CoreComponents do
 
   def list(assigns) do
     ~H"""
-    <ul class="list">
-      <li :for={item <- @item} class="list-row">
-        <div class="list-col-grow">
-          <div class="font-bold">{item.title}</div>
-          <div>{render_slot(item)}</div>
-        </div>
+    <ul class="divide-y divide-(--border-default)">
+      <li
+        :for={item <- @item}
+        class="flex flex-col gap-1 py-3 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4"
+      >
+        <div class="text-sm font-semibold text-(--text-default)">{item.title}</div>
+        <div class="text-sm text-(--text-muted)">{render_slot(item)}</div>
       </li>
     </ul>
     """

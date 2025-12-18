@@ -13,82 +13,86 @@
    The heroicons installation itself is managed by your mix.exs */
 @plugin "../vendor/heroicons";
 
-/* daisyUI Tailwind Plugin. */
-@plugin "daisyui/packages/bundle/daisyui" {
-  themes: false;
+/* Design tokens. Hand-rolled (see AGENTS.md — no daisyUI or other
+   component-library plugin), Tailwind v4-native via @theme, which both
+   registers these as CSS custom properties and generates matching
+   utilities (--color-brand-600 -> bg-brand-600/text-brand-600/etc). */
+@theme {
+  --color-brand-50: #eff6ff;
+  --color-brand-100: #dbeafe;
+  --color-brand-200: #bfdbfe;
+  --color-brand-300: #93c5fd;
+  --color-brand-400: #60a5fa;
+  --color-brand-500: #3b82f6;
+  --color-brand-600: #2563eb;
+  --color-brand-700: #1d4ed8;
+  --color-brand-800: #1e40af;
+  --color-brand-900: #1e3a8a;
+  --color-brand-950: #172554;
+  --color-brand: var(--color-brand-600);
+
+  --color-neutral-0: #ffffff;
+  --color-neutral-50: #f8fafc;
+  --color-neutral-100: #f1f5f9;
+  --color-neutral-200: #e2e8f0;
+  --color-neutral-300: #cbd5e1;
+  --color-neutral-400: #94a3b8;
+  --color-neutral-500: #64748b;
+  --color-neutral-600: #475569;
+  --color-neutral-700: #334155;
+  --color-neutral-800: #1e293b;
+  --color-neutral-900: #0f172a;
+  --color-neutral-950: #020617;
+
+  --color-success-100: #dcfce7;
+  --color-success-500: #16a34a;
+  --color-success-800: #166534;
+  --color-warning-100: #fef3c7;
+  --color-warning-500: #d97706;
+  --color-warning-800: #92400e;
+  --color-error-100: #fee2e2;
+  --color-error-500: #dc2626;
+  --color-error-800: #991b1b;
+  --color-info-100: #dbeafe;
+  --color-info-500: var(--color-brand-600);
+  --color-info-800: #1e40af;
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
 }
 
-/* daisyUI theme plugin.
-  We ship with two themes, a light one inspired on Phoenix colors and a dark one inspired
-  on Elixir colors. Build your own at: https://daisyui.com/theme-generator/ */
-@plugin "daisyui/packages/bundle/daisyui-theme" {
-  name: "dark";
-  default: false;
-  prefersdark: true;
-  color-scheme: "dark";
-  --color-base-100: oklch(30.33% 0.016 252.42);
-  --color-base-200: oklch(25.26% 0.014 253.1);
-  --color-base-300: oklch(20.15% 0.012 254.09);
-  --color-base-content: oklch(97.807% 0.029 256.847);
-  --color-primary: oklch(58% 0.233 277.117);
-  --color-primary-content: oklch(96% 0.018 272.314);
-  --color-secondary: oklch(58% 0.233 277.117);
-  --color-secondary-content: oklch(96% 0.018 272.314);
-  --color-accent: oklch(60% 0.25 292.717);
-  --color-accent-content: oklch(96% 0.016 293.756);
-  --color-neutral: oklch(37% 0.044 257.287);
-  --color-neutral-content: oklch(98% 0.003 247.858);
-  --color-info: oklch(58% 0.158 241.966);
-  --color-info-content: oklch(97% 0.013 236.62);
-  --color-success: oklch(60% 0.118 184.704);
-  --color-success-content: oklch(98% 0.014 180.72);
-  --color-warning: oklch(66% 0.179 58.318);
-  --color-warning-content: oklch(98% 0.022 95.277);
-  --color-error: oklch(58% 0.253 17.585);
-  --color-error-content: oklch(96% 0.015 12.422);
-  --radius-selector: 0.25rem;
-  --radius-field: 0.25rem;
-  --radius-box: 0.5rem;
-  --size-selector: 0.21875rem;
-  --size-field: 0.21875rem;
-  --border: 1.5px;
-  --depth: 1;
-  --noise: 0;
+/* Inter, self-hosted (latin subset, variable weight axis 400-700).
+   See assets/fonts/Inter-OFL.txt for license. No external font
+   CDN/link href — AGENTS.md forbids external link/script references in
+   layouts. */
+@font-face {
+  font-family: "Inter";
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url("/fonts/Inter-Variable.woff2") format("woff2");
 }
 
-@plugin "daisyui/packages/bundle/daisyui-theme" {
-  name: "light";
-  default: true;
-  prefersdark: false;
-  color-scheme: "light";
-  --color-base-100: oklch(98% 0 0);
-  --color-base-200: oklch(96% 0.001 286.375);
-  --color-base-300: oklch(92% 0.004 286.32);
-  --color-base-content: oklch(21% 0.006 285.885);
-  --color-primary: oklch(70% 0.213 47.604);
-  --color-primary-content: oklch(98% 0.016 73.684);
-  --color-secondary: oklch(55% 0.027 264.364);
-  --color-secondary-content: oklch(98% 0.002 247.839);
-  --color-accent: oklch(0% 0 0);
-  --color-accent-content: oklch(100% 0 0);
-  --color-neutral: oklch(44% 0.017 285.786);
-  --color-neutral-content: oklch(98% 0 0);
-  --color-info: oklch(62% 0.214 259.815);
-  --color-info-content: oklch(97% 0.014 254.604);
-  --color-success: oklch(70% 0.14 182.503);
-  --color-success-content: oklch(98% 0.014 180.72);
-  --color-warning: oklch(66% 0.179 58.318);
-  --color-warning-content: oklch(98% 0.022 95.277);
-  --color-error: oklch(58% 0.253 17.585);
-  --color-error-content: oklch(96% 0.015 12.422);
-  --radius-selector: 0.25rem;
-  --radius-field: 0.25rem;
-  --radius-box: 0.5rem;
-  --size-selector: 0.21875rem;
-  --size-field: 0.21875rem;
-  --border: 1.5px;
-  --depth: 1;
-  --noise: 0;
+/* Semantic role tokens — the ones that flip value between light and dark.
+   Light is the default (:root); dark overrides are scoped to the same
+   [data-theme=dark] selector the `dark` custom-variant below matches, so
+   both stay in sync. */
+:root {
+  --surface: var(--color-neutral-0);
+  --surface-muted: var(--color-neutral-50);
+  --surface-sunken: var(--color-neutral-100);
+  --border-default: var(--color-neutral-200);
+  --text-default: var(--color-neutral-900);
+  --text-muted: var(--color-neutral-500);
+}
+
+[data-theme="dark"] {
+  --surface: var(--color-neutral-900);
+  --surface-muted: var(--color-neutral-800);
+  --surface-sunken: var(--color-neutral-950);
+  --border-default: var(--color-neutral-700);
+  --text-default: var(--color-neutral-50);
+  --text-muted: var(--color-neutral-400);
+  color-scheme: dark;
 }
 
 /* Add variants based on LiveView classes */
@@ -104,6 +108,57 @@
 
 /* This file is for your main application CSS */
 
+body {
+  font-family: var(--font-sans);
+}
+
+/* Shared "panel" surface — cards, form panels, list wrappers throughout
+   the app. Dark-mode-correct automatically via the tokens above, no
+   per-call-site dark: classes needed at any of its many call sites. */
+.card {
+  background-color: var(--surface);
+  border: 1px solid var(--border-default);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 1px 3px 0 rgb(15 23 42 / 0.06), 0 1px 2px -1px rgb(15 23 42 / 0.06);
+  color: var(--text-default);
+}
+
+/* A labelled or bare horizontal divider, replacing daisyUI's .divider —
+   used both as <div class="divider">or</div> and a bare <div class="divider" />. */
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1rem 0;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background-color: var(--border-default);
+}
+
+/* --- Transitional compatibility classes ---
+   This redesign lands in phases (see the "Whole-App UI Redesign" plan);
+   pages migrate to .card/the new chrome one phase at a time. Keeping the
+   old class names working (rather than deleting them in this first phase)
+   means every intermediate PR stays visually intact instead of leaving
+   not-yet-migrated pages unstyled. Delete this block once every call site
+   has moved to .card and the new Layouts.app/Layouts.admin chrome. */
+.albert-card {
+  background-color: rgba(255, 255, 255, 0.85);
+  border: 1px solid black;
+  border-radius: 10px;
+  padding: 2rem;
+}
+
 .albert-bg {
   background-image: url("/images/bg_1.jpeg");
   background-repeat: no-repeat;
@@ -111,9 +166,51 @@
   background-size: cover;
 }
 
-.albert-card {
-  background-color: rgba(255, 255, 255, 0.85);
-  border: 1px solid black;
-  border-radius: 10px;
-  padding: 2rem;
+/* The 4 auth pages (login/registration/settings/confirmation) reference
+   these daisyUI class names directly in their own markup — not just via
+   core_components.ex — and are rebuilt properly in a later phase. Shim
+   just enough that they render presentably (not literally unstyled) in
+   the meantime; delete once those pages are rebuilt. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.375rem;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background-color: var(--color-brand-600);
+  color: white;
+}
+
+.btn-soft {
+  background-color: var(--color-brand-50);
+  color: var(--color-brand-700);
+}
+
+.alert {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-default);
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+}
+
+.alert-info {
+  border-color: color-mix(in srgb, var(--color-info-500) 30%, transparent);
+  background-color: var(--color-info-100);
+  color: var(--color-info-800);
+}
+
+.alert-error {
+  border-color: color-mix(in srgb, var(--color-error-500) 30%, transparent);
+  background-color: var(--color-error-100);
+  color: var(--color-error-800);
 }
