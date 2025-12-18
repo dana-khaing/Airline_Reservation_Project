@@ -151,39 +151,66 @@ defmodule AlbertAirlineWeb.Layouts do
   end
 
   @doc """
-  Provides dark vs light theme toggle based on themes defined in app.css.
+  Light/dark theme toggle. A colocated hook persists the choice as a
+  `theme` cookie client-side, which `AlbertAirlineWeb.Router.put_theme/2`
+  reads server-side on the next request — so the very first response
+  already carries the right `data-theme`, no inline script or
+  flash-of-wrong-theme needed (see `root.html.heex`).
 
-  See <head> in root.html.heex which applies the theme before page load.
+  "System" resolves once, at click time, to whatever the OS currently
+  reports (`prefers-color-scheme`), rather than tracking it continuously
+  — simpler, and avoids a persistent client-side media-query listener.
   """
+  attr :id, :string, default: "theme-toggle"
+
   def theme_toggle(assigns) do
     ~H"""
-    <div class="card relative flex flex-row items-center border-2 border-base-300 bg-base-300 rounded-full">
-      <div class="absolute w-1/3 h-full rounded-full border-1 border-base-200 bg-base-100 brightness-200 left-0 [[data-theme=light]_&]:left-1/3 [[data-theme=dark]_&]:left-2/3 [[data-theme-source=system]_&]:!left-0 transition-[left]" />
-
+    <div
+      id={@id}
+      phx-hook=".ThemeToggle"
+      class="inline-flex items-center gap-0.5 rounded-full border border-(--border-default) bg-(--surface) p-1"
+    >
       <button
-        class="flex p-2 cursor-pointer w-1/3"
-        phx-click={JS.dispatch("phx:set-theme")}
+        type="button"
+        class="rounded-full p-1.5 text-(--text-muted) hover:bg-(--surface-muted) hover:text-(--text-default)"
         data-phx-theme="system"
+        aria-label="Match system theme"
       >
-        <.icon name="hero-computer-desktop-micro" class="size-4 opacity-75 hover:opacity-100" />
+        <.icon name="hero-computer-desktop-micro" class="size-4" />
       </button>
-
       <button
-        class="flex p-2 cursor-pointer w-1/3"
-        phx-click={JS.dispatch("phx:set-theme")}
+        type="button"
+        class="rounded-full p-1.5 text-(--text-muted) hover:bg-(--surface-muted) hover:text-(--text-default)"
         data-phx-theme="light"
+        aria-label="Light theme"
       >
-        <.icon name="hero-sun-micro" class="size-4 opacity-75 hover:opacity-100" />
+        <.icon name="hero-sun-micro" class="size-4" />
       </button>
-
       <button
-        class="flex p-2 cursor-pointer w-1/3"
-        phx-click={JS.dispatch("phx:set-theme")}
+        type="button"
+        class="rounded-full p-1.5 text-(--text-muted) hover:bg-(--surface-muted) hover:text-(--text-default)"
         data-phx-theme="dark"
+        aria-label="Dark theme"
       >
-        <.icon name="hero-moon-micro" class="size-4 opacity-75 hover:opacity-100" />
+        <.icon name="hero-moon-micro" class="size-4" />
       </button>
     </div>
+    <script :type={Phoenix.LiveView.ColocatedHook} name=".ThemeToggle">
+      export default {
+        mounted() {
+          this.el.querySelectorAll("[data-phx-theme]").forEach((btn) => {
+            btn.addEventListener("click", () => {
+              let theme = btn.dataset.phxTheme
+              if (theme === "system") {
+                theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"
+              }
+              document.documentElement.dataset.theme = theme
+              document.cookie = `theme=${theme}; path=/; max-age=31536000; samesite=lax`
+            })
+          })
+        }
+      }
+    </script>
     """
   end
 end
