@@ -159,13 +159,6 @@ body {
   padding: 2rem;
 }
 
-.albert-bg {
-  background-image: url("/images/bg_1.jpeg");
-  background-repeat: no-repeat;
-  background-position: top;
-  background-size: cover;
-}
-
 /* The 4 auth pages (login/registration/settings/confirmation) reference
    these daisyUI class names directly in their own markup — not just via
    core_components.ex — and are rebuilt properly in a later phase. Shim
