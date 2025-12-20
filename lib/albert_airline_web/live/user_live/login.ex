@@ -26,7 +26,10 @@ defmodule AlbertAirlineWeb.UserLive.Login do
           </.header>
         </div>
 
-        <div :if={local_mail_adapter?()} class="alert alert-info">
+        <div
+          :if={local_mail_adapter?()}
+          class="flex items-start gap-3 rounded-lg border border-info-500/30 bg-info-100 p-4 text-sm text-info-800 dark:border-info-500/40 dark:bg-info-800/20 dark:text-info-100"
+        >
           <.icon name="hero-information-circle" class="size-6 shrink-0" />
           <div>
             <p>You are running the local mail adapter.</p>
@@ -53,7 +56,7 @@ defmodule AlbertAirlineWeb.UserLive.Login do
             required
             phx-mounted={JS.focus()}
           />
-          <.button class="btn btn-primary w-full">
+          <.button variant="primary" class="w-full">
             Log in with email <span aria-hidden="true">→</span>
           </.button>
         </.form>
@@ -84,10 +87,15 @@ defmodule AlbertAirlineWeb.UserLive.Login do
             autocomplete="current-password"
             spellcheck="false"
           />
-          <.button class="btn btn-primary w-full" name={@form[:remember_me].name} value="true">
+          <.button
+            variant="primary"
+            class="w-full"
+            name={@form[:remember_me].name}
+            value="true"
+          >
             Log in and stay logged in <span aria-hidden="true">→</span>
           </.button>
-          <.button class="btn btn-primary btn-soft w-full mt-2">
+          <.button class="mt-2 w-full">
             Log in only this time
           </.button>
         </.form>
