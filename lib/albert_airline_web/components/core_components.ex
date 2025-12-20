@@ -97,17 +97,36 @@ defmodule AlbertAirlineWeb.CoreComponents do
       <.button navigate={~p"/"}>Home</.button>
   """
   attr :rest, :global, include: ~w(href navigate patch method download name value disabled)
-  attr :class, :any
+  attr :class, :any, default: nil, doc: "extra classes appended after the variant's own"
   attr :variant, :string, values: ~w(primary secondary ghost danger)
   slot :inner_block, required: true
 
   def button(%{rest: rest} = assigns) do
-    base =
+    assigns = assign(assigns, :variant_class, Map.fetch!(button_variants(), assigns[:variant]))
+
+    if rest[:href] || rest[:navigate] || rest[:patch] do
+      ~H"""
+      <.link class={[button_base_class(), @variant_class, @class]} {@rest}>
+        {render_slot(@inner_block)}
+      </.link>
+      """
+    else
+      ~H"""
+      <button class={[button_base_class(), @variant_class, @class]} {@rest}>
+        {render_slot(@inner_block)}
+      </button>
+      """
+    end
+  end
+
+  defp button_base_class,
+    do:
       "inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium " <>
         "transition-colors focus-visible:outline-none focus-visible:ring-2 " <>
         "focus-visible:ring-brand-500/40 disabled:pointer-events-none disabled:opacity-50"
 
-    variants = %{
+  defp button_variants,
+    do: %{
       "primary" =>
         "bg-brand-600 text-white hover:bg-brand-700 dark:bg-brand-500 dark:hover:bg-brand-400",
       "secondary" =>
@@ -117,26 +136,6 @@ defmodule AlbertAirlineWeb.CoreComponents do
       nil =>
         "bg-brand-50 text-brand-700 hover:bg-brand-100 dark:bg-brand-950 dark:text-brand-300 dark:hover:bg-brand-900"
     }
-
-    assigns =
-      assign_new(assigns, :class, fn ->
-        [base, Map.fetch!(variants, assigns[:variant])]
-      end)
-
-    if rest[:href] || rest[:navigate] || rest[:patch] do
-      ~H"""
-      <.link class={@class} {@rest}>
-        {render_slot(@inner_block)}
-      </.link>
-      """
-    else
-      ~H"""
-      <button class={@class} {@rest}>
-        {render_slot(@inner_block)}
-      </button>
-      """
-    end
-  end
 
   @doc """
   Renders an input with label and error messages.
