@@ -50,7 +50,7 @@ defmodule AlbertAirlineWeb.ContactLive.New do
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash} current_scope={@current_scope}>
-      <div class="albert-card mx-auto max-w-3xl text-center">
+      <div class="card mx-auto max-w-3xl text-center">
         <h2 class="text-2xl font-bold">Contact Us</h2>
 
         <h3 class="mt-6 text-xl font-semibold">Connect with Us</h3>
@@ -79,45 +79,17 @@ defmodule AlbertAirlineWeb.ContactLive.New do
           id="contact-form"
           phx-change="validate"
           phx-submit="save"
-          class="mx-auto mt-4 flex max-w-sm flex-col items-center gap-3 rounded-lg border border-black/30 p-4"
+          class="mx-auto mt-4 flex max-w-sm flex-col items-center gap-3 rounded-lg border border-(--border-default) p-4"
         >
-          <.input
-            field={@form[:first_name]}
-            type="text"
-            label="First name :"
-            class="w-full rounded border border-black/40 px-2 py-1"
-          />
-          <.input
-            field={@form[:last_name]}
-            type="text"
-            label="Last name :"
-            class="w-full rounded border border-black/40 px-2 py-1"
-          />
-          <.input
-            field={@form[:company_name]}
-            type="text"
-            label="Company name :"
-            class="w-full rounded border border-black/40 px-2 py-1"
-          />
-          <.input
-            field={@form[:email]}
-            type="email"
-            label="Email :"
-            class="w-full rounded border border-black/40 px-2 py-1"
-          />
-          <.input
-            field={@form[:message]}
-            type="textarea"
-            label="Message :"
-            class="w-full rounded border border-black/40 px-2 py-1"
-          />
+          <.input field={@form[:first_name]} type="text" label="First name :" />
+          <.input field={@form[:last_name]} type="text" label="Last name :" />
+          <.input field={@form[:company_name]} type="text" label="Company name :" />
+          <.input field={@form[:email]} type="email" label="Email :" />
+          <.input field={@form[:message]} type="textarea" label="Message :" />
 
-          <button
-            type="submit"
-            class="mt-2 cursor-pointer rounded-md bg-[#2563eb] px-4 py-2 font-semibold text-white"
-          >
+          <.button type="submit" variant="primary" class="mt-2">
             Submit
-          </button>
+          </.button>
         </.form>
 
         <h3 class="mt-6 text-xl font-semibold">Customer Support</h3>

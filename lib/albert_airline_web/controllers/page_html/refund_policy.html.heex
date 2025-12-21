@@ -1,24 +1,20 @@
 <Layouts.app flash={@flash} current_scope={@current_scope}>
-  <div class="albert-card mx-auto max-w-3xl">
-    <div class="rounded-lg border-2 border-red-600 bg-red-50 p-4 text-sm text-red-800">
-      <strong>Draft — not legal advice.</strong>
-      This document was drafted as a starting point and has not been reviewed by
-      a lawyer. Consumer refund rights for cancelled/delayed travel are
-      regulated in many jurisdictions (e.g. EU261 in the EU/UK, DOT rules in
-      the US) and can override what a business's own policy says. Have
-      qualified counsel review and adapt this — including the cutoff windows
-      and fees below, which are placeholders — before relying on it for a
-      real launch.
-    </div>
+  <div class="card mx-auto max-w-3xl">
+    <.legal_draft_notice>
+      Consumer refund rights for cancelled/delayed travel are regulated in
+      many jurisdictions (e.g. EU261 in the EU/UK, DOT rules in the US) and
+      can override what a business's own policy says — including the cutoff
+      windows and fees below, which are placeholders.
+    </.legal_draft_notice>
 
     <h2 class="mt-6 text-3xl font-bold">Refund &amp; Cancellation Policy</h2>
-    <p class="mt-1 text-center text-sm text-black/60">Last updated: August 10, 2026</p>
+    <p class="mt-1 text-center text-sm text-(--text-muted)">Last updated: August 10, 2026</p>
 
     <h3 class="mt-6 text-xl font-semibold">1. Cancelling a Booking</h3>
     <p class="mt-2">
       You can cancel any upcoming, confirmed booking yourself from <.link
         href="/account"
-        class="text-[#2563eb] underline"
+        class="text-brand-600 underline hover:text-brand-700 dark:text-brand-400"
       >My Bookings</.link>.
       Cancelling releases your seat immediately and refunds its price to the
       original payment method used at checkout.
@@ -54,7 +50,10 @@
       In rare cases a refund attempt can fail on the payment processor's side.
       Your cancellation still takes effect (your seat is released either way);
       if you don't see your refund within a reasonable time, contact us via
-      <.link href="/contact" class="text-[#2563eb] underline">Contact Us</.link>
+      <.link
+        href="/contact"
+        class="text-brand-600 underline hover:text-brand-700 dark:text-brand-400"
+      >Contact Us</.link>
       with your confirmation code.
     </p>
 
