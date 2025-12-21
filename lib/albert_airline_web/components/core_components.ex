@@ -31,6 +31,32 @@ defmodule AlbertAirlineWeb.CoreComponents do
   alias Phoenix.LiveView.JS
 
   @doc """
+  Renders the "draft, not legal advice" notice shared by the 3 legal
+  pages (terms/privacy/refund-policy) — was identical wrapper markup
+  copy-pasted 3 times, each with its own jurisdiction-specific middle
+  sentence passed in as the slot.
+
+  ## Examples
+
+      <.legal_draft_notice>
+        Aviation booking, consumer protection, and refund rules vary
+        significantly by jurisdiction.
+      </.legal_draft_notice>
+  """
+  slot :inner_block, required: true
+
+  def legal_draft_notice(assigns) do
+    ~H"""
+    <div class="rounded-lg border border-warning-500/40 bg-warning-100 p-4 text-sm text-warning-800 dark:border-warning-500/30 dark:bg-warning-800/20 dark:text-warning-100">
+      <strong>Draft — not legal advice.</strong>
+      This document was drafted as a starting point and has not been reviewed by
+      a lawyer. {render_slot(@inner_block)} Have qualified counsel review and adapt
+      this before relying on it for a real launch.
+    </div>
+    """
+  end
+
+  @doc """
   Renders flash notices.
 
   ## Examples
@@ -96,7 +122,9 @@ defmodule AlbertAirlineWeb.CoreComponents do
       <.button phx-click="go" variant="primary">Send!</.button>
       <.button navigate={~p"/"}>Home</.button>
   """
-  attr :rest, :global, include: ~w(href navigate patch method download name value disabled)
+  attr :rest, :global,
+    include: ~w(type href navigate patch method download name value disabled)
+
   attr :class, :any, default: nil, doc: "extra classes appended after the variant's own"
   attr :variant, :string, values: ~w(primary secondary ghost danger)
   slot :inner_block, required: true
