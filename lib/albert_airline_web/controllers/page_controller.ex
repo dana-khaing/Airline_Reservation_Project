@@ -13,20 +13,6 @@ defmodule AlbertAirlineWeb.PageController do
     render(conn, :contact)
   end
 
-  def login(conn, _params) do
-    render(conn, :coming_soon,
-      title: "Log in",
-      message: "Account sign-in is being built next — check back soon."
-    )
-  end
-
-  def signup(conn, _params) do
-    render(conn, :coming_soon,
-      title: "Sign up",
-      message: "New account creation is being built next — check back soon."
-    )
-  end
-
   def search(conn, _params) do
     render(conn, :coming_soon,
       title: "Flight Search",

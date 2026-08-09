@@ -9,9 +9,16 @@
 # 10x10 mockup layout) with a few seats already booked so the seat map has
 # something to show from the start.
 
+alias AlbertAirline.Accounts
 alias AlbertAirline.Repo
 alias AlbertAirline.Flights.{Airline, Airport, Flight, Seat}
 alias AlbertAirline.Bookings.Booking
+
+{:ok, demo_user} = Accounts.register_user(%{email: "demo@albertairline.test"})
+demo_user = Repo.update!(AlbertAirline.Accounts.User.confirm_changeset(demo_user))
+
+{:ok, {demo_user, _expired_tokens}} =
+  Accounts.update_user_password(demo_user, %{password: "albertairline-demo"})
 
 seat_rows = 1..10
 seat_columns = ~w(A B C D E F G H I J)
@@ -176,6 +183,7 @@ Enum.each(flight_specs, fn spec ->
         Booking.changeset(%Booking{}, %{
           seat_id: seat.id,
           flight_id: flight.id,
+          user_id: demo_user.id,
           status: "confirmed",
           total_price: spec.base_price,
           confirmation_code: "SEED-#{flight.flight_number}-#{seat.label}",
@@ -188,3 +196,5 @@ end)
 IO.puts(
   "Seeded #{length(airports)} airports, #{length(airlines)} airlines, #{length(flight_specs)} flights with full seat grids."
 )
+
+IO.puts("Demo login: demo@albertairline.test / albertairline-demo")

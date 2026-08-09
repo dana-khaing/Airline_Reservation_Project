@@ -23,6 +23,7 @@ defmodule AlbertAirline.BookingsTest do
     test "create_booking/1 with valid data creates a booking" do
       seat = AlbertAirline.FlightsFixtures.seat_fixture()
       flight = AlbertAirline.FlightsFixtures.flight_fixture()
+      user = AlbertAirline.AccountsFixtures.user_fixture()
 
       valid_attrs = %{
         status: "confirmed",
@@ -30,7 +31,8 @@ defmodule AlbertAirline.BookingsTest do
         confirmation_code: "some confirmation_code",
         booked_at: ~U[2026-08-08 10:25:00Z],
         seat_id: seat.id,
-        flight_id: flight.id
+        flight_id: flight.id,
+        user_id: user.id
       }
 
       assert {:ok, %Booking{} = booking} = Bookings.create_booking(valid_attrs)
@@ -81,6 +83,7 @@ defmodule AlbertAirline.BookingsTest do
     test "a seat cannot have two active bookings at once" do
       seat = AlbertAirline.FlightsFixtures.seat_fixture()
       flight = AlbertAirline.FlightsFixtures.flight_fixture()
+      user = AlbertAirline.AccountsFixtures.user_fixture()
 
       assert {:ok, _booking} =
                Bookings.create_booking(%{
@@ -89,7 +92,8 @@ defmodule AlbertAirline.BookingsTest do
                  confirmation_code: "first-confirmation",
                  booked_at: ~U[2026-08-08 10:25:00Z],
                  seat_id: seat.id,
-                 flight_id: flight.id
+                 flight_id: flight.id,
+                 user_id: user.id
                })
 
       assert {:error, changeset} =
@@ -99,7 +103,8 @@ defmodule AlbertAirline.BookingsTest do
                  confirmation_code: "second-confirmation",
                  booked_at: ~U[2026-08-08 10:25:00Z],
                  seat_id: seat.id,
-                 flight_id: flight.id
+                 flight_id: flight.id,
+                 user_id: user.id
                })
 
       assert %{seat_id: ["has already been taken"]} = errors_on(changeset)
