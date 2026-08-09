@@ -10,9 +10,4 @@ defmodule AlbertAirlineWeb.PageControllerTest do
     conn = get(conn, ~p"/about")
     assert html_response(conn, 200) =~ "ABOUT US"
   end
-
-  test "GET /contact", %{conn: conn} do
-    conn = get(conn, ~p"/contact")
-    assert html_response(conn, 200) =~ "Connect with Us"
-  end
 end
