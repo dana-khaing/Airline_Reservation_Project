@@ -1,0 +1,31 @@
+# fly.toml — Fly.io deployment config.
+#
+# This file is committed so `fly launch --no-deploy` / `fly deploy` have
+# something to work from, but no app has actually been created or deployed
+# from this environment (no Fly.io account/credentials available here).
+# See README.md "Deployment" for the steps to take this live.
+
+app = "albert-airline"
+primary_region = "lhr"
+
+[build]
+
+[deploy]
+  release_command = "/app/bin/migrate"
+
+[env]
+  PHX_HOST = "albert-airline.fly.dev"
+  PORT = "8080"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+
+[[vm]]
+  memory = "512mb"
+  cpu_kind = "shared"
+  cpus = 1
