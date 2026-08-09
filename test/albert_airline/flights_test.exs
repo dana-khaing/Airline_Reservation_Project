@@ -184,6 +184,49 @@ defmodule AlbertAirline.FlightsTest do
       assert {:error, %Ecto.Changeset{}} = Flights.create_flight(@invalid_attrs)
     end
 
+    test "create_flight/1 rejects an arrival time at or before departure" do
+      airline = airline_fixture()
+      departure_airport = airport_fixture()
+      arrival_airport = airport_fixture()
+
+      attrs = %{
+        flight_number: "some flight_number",
+        departure_time: ~U[2026-08-08 18:00:00Z],
+        arrival_time: ~U[2026-08-08 10:25:00Z],
+        aircraft: "some aircraft",
+        base_price: "120.5",
+        stops: 0,
+        airline_id: airline.id,
+        departure_airport_id: departure_airport.id,
+        arrival_airport_id: arrival_airport.id
+      }
+
+      assert {:error, changeset} = Flights.create_flight(attrs)
+      assert %{arrival_time: ["must be after departure time"]} = errors_on(changeset)
+    end
+
+    test "create_flight/1 rejects the same airport for departure and arrival" do
+      airline = airline_fixture()
+      airport = airport_fixture()
+
+      attrs = %{
+        flight_number: "some flight_number",
+        departure_time: ~U[2026-08-08 10:25:00Z],
+        arrival_time: ~U[2026-08-08 18:00:00Z],
+        aircraft: "some aircraft",
+        base_price: "120.5",
+        stops: 0,
+        airline_id: airline.id,
+        departure_airport_id: airport.id,
+        arrival_airport_id: airport.id
+      }
+
+      assert {:error, changeset} = Flights.create_flight(attrs)
+
+      assert %{arrival_airport_id: ["must be different from departure airport"]} =
+               errors_on(changeset)
+    end
+
     test "update_flight/2 with valid data updates the flight" do
       flight = flight_fixture()
 
