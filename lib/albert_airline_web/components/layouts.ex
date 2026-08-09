@@ -44,6 +44,7 @@ defmodule AlbertAirlineWeb.Layouts do
             <.nav_link href="/contact">Contact Us</.nav_link>
             <.nav_link href="/">Home</.nav_link>
             <%= if @current_scope && @current_scope.user do %>
+              <.nav_link :if={@current_scope.user.is_admin} href="/admin">Admin</.nav_link>
               <.nav_link href="/users/settings">{@current_scope.user.email}</.nav_link>
               <.link
                 href="/users/log-out"

@@ -78,4 +78,23 @@ defmodule AlbertAirlineWeb.Router do
     post "/users/log-in", UserSessionController, :create
     delete "/users/log-out", UserSessionController, :delete
   end
+
+  ## Admin routes
+
+  scope "/admin", AlbertAirlineWeb.AdminLive do
+    pipe_through [:browser]
+
+    live_session :require_admin, on_mount: [{AlbertAirlineWeb.UserAuth, :require_admin}] do
+      live "/", Dashboard, :index
+      live "/airports", AirportIndex, :index
+      live "/airports/new", AirportForm, :new
+      live "/airports/:id/edit", AirportForm, :edit
+      live "/airlines", AirlineIndex, :index
+      live "/airlines/new", AirlineForm, :new
+      live "/airlines/:id/edit", AirlineForm, :edit
+      live "/flights", FlightIndex, :index
+      live "/flights/new", FlightForm, :new
+      live "/flights/:id/edit", FlightForm, :edit
+    end
+  end
 end

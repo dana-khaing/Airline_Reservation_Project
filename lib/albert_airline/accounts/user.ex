@@ -8,6 +8,7 @@ defmodule AlbertAirline.Accounts.User do
     field :hashed_password, :string, redact: true
     field :confirmed_at, :utc_datetime
     field :authenticated_at, :utc_datetime, virtual: true
+    field :is_admin, :boolean, default: false
 
     has_many :bookings, AlbertAirline.Bookings.Booking
 

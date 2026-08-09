@@ -86,7 +86,10 @@ defmodule AlbertAirline.Flights do
 
   """
   def delete_airline(%Airline{} = airline) do
-    Repo.delete(airline)
+    airline
+    |> Ecto.Changeset.change()
+    |> Ecto.Changeset.no_assoc_constraint(:flights, name: :flights_airline_id_fkey)
+    |> Repo.delete()
   end
 
   @doc """
@@ -182,7 +185,15 @@ defmodule AlbertAirline.Flights do
 
   """
   def delete_airport(%Airport{} = airport) do
-    Repo.delete(airport)
+    airport
+    |> Ecto.Changeset.change()
+    |> Ecto.Changeset.no_assoc_constraint(:departing_flights,
+      name: :flights_departure_airport_id_fkey
+    )
+    |> Ecto.Changeset.no_assoc_constraint(:arriving_flights,
+      name: :flights_arrival_airport_id_fkey
+    )
+    |> Repo.delete()
   end
 
   @doc """
@@ -245,6 +256,42 @@ defmodule AlbertAirline.Flights do
     %Flight{}
     |> Flight.changeset(attrs)
     |> Repo.insert()
+  end
+
+  @seat_rows 1..10
+  @seat_columns ~w(A B C D E F G H I J)
+  @business_rows [1, 2]
+
+  @doc """
+  Creates a flight and generates its full 10x10 seat grid (rows 1-2
+  business, rest economy) in one transaction — what the admin UI uses, so
+  a newly created flight is immediately searchable and bookable instead of
+  needing a separate manual seeding step.
+  """
+  def create_flight_with_seats(attrs) do
+    Repo.transaction(fn ->
+      with {:ok, flight} <- create_flight(attrs) do
+        Enum.each(@seat_rows, fn row ->
+          Enum.each(@seat_columns, fn column ->
+            seat_class = if row in @business_rows, do: "business", else: "economy"
+
+            case create_seat(%{
+                   flight_id: flight.id,
+                   label: "#{row}#{column}",
+                   seat_class: seat_class,
+                   status: "available"
+                 }) do
+              {:ok, _seat} -> :ok
+              {:error, changeset} -> Repo.rollback(changeset)
+            end
+          end)
+        end)
+
+        flight
+      else
+        {:error, changeset} -> Repo.rollback(changeset)
+      end
+    end)
   end
 
   @doc """
