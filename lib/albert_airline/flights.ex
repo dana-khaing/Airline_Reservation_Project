@@ -367,6 +367,13 @@ defmodule AlbertAirline.Flights do
   end
 
   @doc """
+  Fetches multiple seats by id in a single query.
+  """
+  def get_seats(ids) do
+    Repo.all(from(s in Seat, where: s.id in ^ids))
+  end
+
+  @doc """
   Gets a single seat.
 
   Raises `Ecto.NoResultsError` if the Seat does not exist.
