@@ -40,7 +40,6 @@ defmodule AlbertAirline.Bookings.Booking do
     ])
     |> validate_inclusion(:status, @statuses)
     |> validate_number(:total_price, greater_than: 0)
-    |> unique_constraint(:confirmation_code)
     |> unique_constraint(:seat_id, name: :bookings_active_seat_id_index)
     |> foreign_key_constraint(:seat_id)
     |> foreign_key_constraint(:flight_id)

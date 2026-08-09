@@ -4,6 +4,8 @@ defmodule AlbertAirline.Bookings do
   """
 
   import Ecto.Query, warn: false
+  alias AlbertAirline.Flights
+  alias AlbertAirline.Payments
   alias AlbertAirline.Repo
 
   alias AlbertAirline.Bookings.Booking
@@ -100,5 +102,110 @@ defmodule AlbertAirline.Bookings do
   """
   def change_booking(%Booking{} = booking, attrs \\ %{}) do
     Booking.changeset(booking, attrs)
+  end
+
+  @doc """
+  Returns every booking sharing a confirmation code (one order can cover
+  multiple seats, one Booking row per seat).
+  """
+  def list_bookings_by_confirmation_code(code) do
+    Repo.all(from(b in Booking, where: b.confirmation_code == ^code))
+  end
+
+  @doc """
+  Starts a Stripe checkout for the given seats on a flight. No Booking rows
+  are created yet — deliberately, per this project's "atomic check-at-
+  booking-time, no pre-hold" design: nothing is reserved just because
+  someone opened checkout. Seats are only actually claimed once payment is
+  confirmed, in `confirm_from_stripe_session/1`.
+  """
+  def start_checkout(user, flight, seat_ids, success_url, cancel_url) when seat_ids != [] do
+    flight = Repo.preload(flight, [:departure_airport, :arrival_airport])
+    confirmation_code = generate_confirmation_code()
+    total_amount = Decimal.mult(flight.base_price, Decimal.new(length(seat_ids)))
+
+    Payments.create_checkout_session(%{
+      amount: total_amount,
+      description:
+        "#{flight.flight_number}: #{flight.departure_airport.iata_code} to #{flight.arrival_airport.iata_code} (#{length(seat_ids)} seat(s))",
+      success_url: success_url,
+      cancel_url: cancel_url,
+      metadata: %{
+        "confirmation_code" => confirmation_code,
+        "flight_id" => to_string(flight.id),
+        "user_id" => to_string(user.id),
+        "seat_ids" => Enum.join(seat_ids, ",")
+      }
+    })
+  end
+
+  @doc """
+  Confirms a completed Stripe checkout: verifies payment, then atomically
+  claims every seat in the order (one Booking insert per seat, in a single
+  transaction guarded by the partial unique index on bookings.seat_id).
+
+  If any seat was claimed by someone else in the meantime — the real
+  concurrency case this design accepts, since there's no pre-hold — the
+  whole transaction rolls back and the payment that just succeeded is
+  refunded automatically. Idempotent: re-confirming an already-confirmed
+  session just returns the existing bookings instead of trying (and
+  failing) to insert them again.
+  """
+  def confirm_from_stripe_session(session_id) do
+    with {:ok, session} <- Payments.retrieve_checkout_session(session_id) do
+      confirmation_code = session.metadata["confirmation_code"]
+
+      case list_bookings_by_confirmation_code(confirmation_code) do
+        [] -> do_confirm(session, confirmation_code)
+        existing -> {:ok, existing}
+      end
+    end
+  end
+
+  defp do_confirm(%{payment_status: "paid"} = session, confirmation_code) do
+    %{"flight_id" => flight_id_str, "user_id" => user_id_str, "seat_ids" => seat_ids_str} =
+      session.metadata
+
+    flight_id = String.to_integer(flight_id_str)
+    user_id = String.to_integer(user_id_str)
+    seat_ids = seat_ids_str |> String.split(",") |> Enum.map(&String.to_integer/1)
+
+    flight = Flights.get_flight!(flight_id)
+    seats = Enum.map(seat_ids, &Flights.get_seat!/1)
+    now = DateTime.utc_now(:second)
+
+    multi =
+      Enum.reduce(seats, Ecto.Multi.new(), fn seat, multi ->
+        multi
+        |> Ecto.Multi.insert(
+          {:booking, seat.id},
+          Booking.changeset(%Booking{}, %{
+            seat_id: seat.id,
+            flight_id: flight_id,
+            user_id: user_id,
+            status: "confirmed",
+            total_price: flight.base_price,
+            confirmation_code: confirmation_code,
+            booked_at: now
+          })
+        )
+        |> Ecto.Multi.update({:seat, seat.id}, Flights.change_seat(seat, %{status: "booked"}))
+      end)
+
+    case Repo.transaction(multi) do
+      {:ok, results} ->
+        Enum.each(seat_ids, fn id -> Flights.broadcast_seat_updated(results[{:seat, id}]) end)
+        {:ok, Enum.map(seat_ids, &results[{:booking, &1}])}
+
+      {:error, _failed_op, _reason, _changes} ->
+        if session.payment_intent, do: Payments.refund(session.payment_intent)
+        {:error, :seat_conflict}
+    end
+  end
+
+  defp do_confirm(_session, _confirmation_code), do: {:error, :payment_not_completed}
+
+  defp generate_confirmation_code do
+    :crypto.strong_rand_bytes(6) |> Base.encode32(case: :upper, padding: false)
   end
 end

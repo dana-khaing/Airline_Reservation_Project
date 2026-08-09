@@ -510,6 +510,22 @@ defmodule AlbertAirline.Flights do
     Phoenix.PubSub.subscribe(AlbertAirline.PubSub, seat_topic(flight_id))
   end
 
+  @doc """
+  Broadcasts that a seat's status changed, without performing the update
+  itself. For callers (like the booking transaction) that update a seat as
+  part of a larger multi-step transaction and only want to notify watchers
+  after that transaction has actually committed.
+  """
+  def broadcast_seat_updated(%Seat{} = seat) do
+    Phoenix.PubSub.broadcast(
+      AlbertAirline.PubSub,
+      seat_topic(seat.flight_id),
+      {:seat_updated, seat}
+    )
+
+    seat
+  end
+
   defp seat_topic(flight_id), do: "flight:#{flight_id}:seats"
 
   defp broadcast_seat_change({:ok, %Seat{} = seat} = result) do
