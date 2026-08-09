@@ -72,7 +72,7 @@ defmodule AlbertAirlineWeb.FlightLive.Search do
     <Layouts.app flash={@flash} current_scope={@current_scope}>
       <div class="mx-auto max-w-5xl">
         <div class="albert-card mb-6">
-          <form phx-change="filter">
+          <form id="search-form" phx-change="filter">
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5 lg:items-end">
               <.input
                 type="select"
