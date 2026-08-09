@@ -287,4 +287,91 @@ defmodule AlbertAirline.FlightsTest do
       assert %Ecto.Changeset{} = Flights.change_seat(seat)
     end
   end
+
+  describe "search_flights/1" do
+    import AlbertAirline.FlightsFixtures
+
+    setup do
+      albert = airline_fixture(%{name: "Albert Airline", code: "A8"})
+      thai = airline_fixture(%{name: "Thai Airways", code: "TG"})
+      lhr = airport_fixture(%{iata_code: "LHR"})
+      ygn = airport_fixture(%{iata_code: "YGN"})
+
+      direct =
+        flight_fixture(%{
+          airline_id: albert.id,
+          departure_airport_id: lhr.id,
+          arrival_airport_id: ygn.id,
+          departure_time: ~U[2026-09-01 10:00:00Z],
+          arrival_time: ~U[2026-09-01 18:00:00Z],
+          stops: 0
+        })
+
+      one_stop =
+        flight_fixture(%{
+          airline_id: thai.id,
+          departure_airport_id: lhr.id,
+          arrival_airport_id: ygn.id,
+          departure_time: ~U[2026-09-02 10:00:00Z],
+          arrival_time: ~U[2026-09-02 22:00:00Z],
+          stops: 1
+        })
+
+      %{albert: albert, thai: thai, lhr: lhr, ygn: ygn, direct: direct, one_stop: one_stop}
+    end
+
+    test "with no criteria returns every flight, soonest first", %{
+      direct: direct,
+      one_stop: one_stop
+    } do
+      assert Enum.map(Flights.search_flights(), & &1.id) == [direct.id, one_stop.id]
+    end
+
+    test "filters by departure and arrival airport", %{
+      lhr: lhr,
+      ygn: ygn,
+      direct: direct,
+      one_stop: one_stop
+    } do
+      results =
+        Flights.search_flights(%{departure_airport_id: lhr.id, arrival_airport_id: ygn.id})
+
+      assert Enum.map(results, & &1.id) |> Enum.sort() == Enum.sort([direct.id, one_stop.id])
+
+      assert Flights.search_flights(%{departure_airport_id: ygn.id}) == []
+    end
+
+    test "filters by stop category", %{direct: direct, one_stop: one_stop} do
+      assert [%{id: id}] = Flights.search_flights(%{stops: ["direct"]})
+      assert id == direct.id
+
+      assert [%{id: id}] = Flights.search_flights(%{stops: ["one_stop"]})
+      assert id == one_stop.id
+    end
+
+    test "filters by airline", %{albert: albert, direct: direct} do
+      assert [%{id: id}] = Flights.search_flights(%{airline_ids: [albert.id]})
+      assert id == direct.id
+    end
+
+    test "filters by departure date", %{direct: direct} do
+      assert [%{id: id}] = Flights.search_flights(%{date: "2026-09-01"})
+      assert id == direct.id
+      assert Flights.search_flights(%{date: "2026-09-30"}) == []
+    end
+
+    test "ignores an unparseable date instead of raising", %{direct: direct, one_stop: one_stop} do
+      assert Enum.map(Flights.search_flights(%{date: "not-a-date"}), & &1.id) ==
+               [direct.id, one_stop.id]
+    end
+
+    test "filters by minimum available seats", %{direct: direct} do
+      seat_fixture(%{flight_id: direct.id, label: "1A", status: "available"})
+      seat_fixture(%{flight_id: direct.id, label: "1B", status: "available"})
+
+      assert [%{id: id}] = Flights.search_flights(%{seats: "2"})
+      assert id == direct.id
+      assert Flights.search_flights(%{seats: "3"}) == []
+    end
+  end
 end
