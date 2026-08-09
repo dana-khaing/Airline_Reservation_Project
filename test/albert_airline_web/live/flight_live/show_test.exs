@@ -105,6 +105,26 @@ defmodule AlbertAirlineWeb.FlightLive.ShowTest do
              lv |> element("button", "Book the flight") |> render_click()
   end
 
+  test "seat buttons carry ARIA state for screen readers and toggle it live", %{
+    conn: conn,
+    flight: flight,
+    seat: seat,
+    booked_seat: booked_seat
+  } do
+    {:ok, lv, html} = live(conn, ~p"/flights/#{flight.id}")
+
+    assert button_tag(html, seat.id) =~ ~s(aria-pressed="false")
+
+    assert button_tag(html, seat.id) =~
+             ~s(aria-label="Seat #{seat.label}, #{seat.seat_class}, available")
+
+    assert button_tag(html, booked_seat.id) =~
+             ~s(aria-label="Seat #{booked_seat.label}, #{booked_seat.seat_class}, unavailable")
+
+    html = lv |> element("button[phx-value-id='#{seat.id}']") |> render_click()
+    assert button_tag(html, seat.id) =~ ~s(aria-pressed="true")
+  end
+
   defp button_tag(html, seat_id) do
     [tag] = Regex.run(~r/<button[^>]*phx-value-id="#{seat_id}"[^>]*>/, html)
     tag

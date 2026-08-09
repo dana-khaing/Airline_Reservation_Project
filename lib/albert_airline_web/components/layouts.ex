@@ -36,10 +36,16 @@ defmodule AlbertAirlineWeb.Layouts do
   def app(assigns) do
     ~H"""
     <div class="albert-bg min-h-screen">
+      <a
+        href="#main-content"
+        class="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-lg focus:bg-white focus:px-4 focus:py-2 focus:font-semibold focus:text-black"
+      >
+        Skip to main content
+      </a>
       <div class="px-4 pt-6 sm:px-8">
-        <nav class="topnav mx-auto flex max-w-5xl items-center justify-between rounded-xl bg-white/60 px-4 py-3">
+        <nav class="topnav mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-y-2 rounded-xl bg-white/60 px-4 py-3">
           <span class="text-lg font-bold text-black">ALBERT AIRLINE</span>
-          <div class="flex items-center gap-2">
+          <div class="flex flex-wrap items-center gap-2">
             <.nav_link href="/about">About</.nav_link>
             <.nav_link href="/contact">Contact Us</.nav_link>
             <.nav_link href="/">Home</.nav_link>
@@ -50,7 +56,7 @@ defmodule AlbertAirlineWeb.Layouts do
               <.link
                 href="/users/log-out"
                 method="delete"
-                class="rounded-lg bg-[#2a9df1] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
+                class="rounded-lg bg-[#2563eb] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
               >
                 Log out
               </.link>
@@ -61,7 +67,7 @@ defmodule AlbertAirlineWeb.Layouts do
         </nav>
       </div>
 
-      <main class="px-4 py-10 sm:px-8">
+      <main id="main-content" class="px-4 py-10 sm:px-8">
         <div class="mx-auto max-w-5xl">
           {render_slot(@inner_block)}
         </div>
@@ -83,7 +89,7 @@ defmodule AlbertAirlineWeb.Layouts do
     ~H"""
     <.link
       href={@href}
-      class="rounded-lg bg-[#2a9df1] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
+      class="rounded-lg bg-[#2563eb] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
     >
       {render_slot(@inner_block)}
     </.link>

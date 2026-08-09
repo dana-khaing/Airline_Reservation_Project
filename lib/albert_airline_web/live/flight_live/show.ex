@@ -125,9 +125,17 @@ defmodule AlbertAirlineWeb.FlightLive.Show do
 
   defp seat_class(seat, selected_seat_ids) do
     cond do
-      MapSet.member?(selected_seat_ids, seat.id) -> "bg-[#2a9df1] text-white border-[#2a9df1]"
-      seat.status != "available" -> "bg-black/20 text-black/40 cursor-not-allowed"
-      true -> "bg-white text-black border-black/30 hover:bg-[#2a9df1]/20"
+      MapSet.member?(selected_seat_ids, seat.id) -> "bg-[#2563eb] text-white border-[#2563eb]"
+      seat.status != "available" -> "bg-gray-300 text-gray-700 line-through cursor-not-allowed"
+      true -> "bg-white text-black border-black/40 hover:bg-[#2563eb]/20"
+    end
+  end
+
+  defp seat_status_label(seat, selected_seat_ids) do
+    cond do
+      MapSet.member?(selected_seat_ids, seat.id) -> "selected"
+      seat.status != "available" -> "unavailable"
+      true -> "available"
     end
   end
 
@@ -158,23 +166,34 @@ defmodule AlbertAirlineWeb.FlightLive.Show do
         </p>
 
         <h4 class="mt-6 font-semibold">Choose the seat for the trip :</h4>
-        <div class="mt-3 flex flex-col items-center gap-1">
-          <div :for={row <- seat_rows(@seats)} class="flex gap-1">
-            <button
-              :for={seat <- row}
-              type="button"
-              phx-click="toggle_seat"
-              phx-value-id={seat.id}
-              disabled={
-                seat.status != "available" and not MapSet.member?(@selected_seat_ids, seat.id)
-              }
-              class={[
-                "h-8 w-10 rounded border text-xs font-semibold",
-                seat_class(seat, @selected_seat_ids)
-              ]}
-            >
-              {seat.label}
-            </button>
+        <p class="mt-1 text-sm text-black/60">
+          Available seats are white, selected seats are blue, unavailable seats are struck through and gray.
+        </p>
+        <div class="mt-3 overflow-x-auto">
+          <div
+            role="group"
+            aria-label="Seat map"
+            class="flex w-fit flex-col items-center gap-1 mx-auto"
+          >
+            <div :for={row <- seat_rows(@seats)} class="flex gap-1">
+              <button
+                :for={seat <- row}
+                type="button"
+                phx-click="toggle_seat"
+                phx-value-id={seat.id}
+                aria-pressed={to_string(MapSet.member?(@selected_seat_ids, seat.id))}
+                aria-label={"Seat #{seat.label}, #{seat.seat_class}, #{seat_status_label(seat, @selected_seat_ids)}"}
+                disabled={
+                  seat.status != "available" and not MapSet.member?(@selected_seat_ids, seat.id)
+                }
+                class={[
+                  "h-8 w-10 shrink-0 rounded border text-xs font-semibold",
+                  seat_class(seat, @selected_seat_ids)
+                ]}
+              >
+                {seat.label}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -197,7 +216,7 @@ defmodule AlbertAirlineWeb.FlightLive.Show do
             type="button"
             phx-click="book"
             disabled={MapSet.size(@selected_seat_ids) == 0}
-            class="rounded-lg bg-[#2a9df1] px-6 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
+            class="rounded-lg bg-[#2563eb] px-6 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
           >
             Book the flight
           </button>

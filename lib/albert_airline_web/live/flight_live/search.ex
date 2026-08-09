@@ -71,6 +71,7 @@ defmodule AlbertAirlineWeb.FlightLive.Search do
     ~H"""
     <Layouts.app flash={@flash} current_scope={@current_scope}>
       <div class="mx-auto max-w-5xl">
+        <h2 class="mb-4 text-2xl font-bold">Flight Search</h2>
         <div class="albert-card mb-6">
           <form id="search-form" phx-change="filter">
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5 lg:items-end">
@@ -107,7 +108,7 @@ defmodule AlbertAirlineWeb.FlightLive.Search do
               />
               <button
                 type="submit"
-                class="btn rounded-lg bg-[#2a9df1] px-6 py-2 font-semibold text-white"
+                class="btn rounded-lg bg-[#2563eb] px-6 py-2 font-semibold text-white"
               >
                 Search Your Flight
               </button>
