@@ -56,6 +56,7 @@ defmodule AlbertAirlineWeb.Router do
       on_mount: [{AlbertAirlineWeb.UserAuth, :require_authenticated}] do
       live "/users/settings", UserLive.Settings, :edit
       live "/users/settings/confirm-email/:token", UserLive.Settings, :confirm_email
+      live "/account", AccountLive.Bookings, :index
     end
 
     post "/users/update-password", UserSessionController, :update_password
