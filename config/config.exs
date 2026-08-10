@@ -49,6 +49,15 @@ config :phoenix_live_view,
 # at the `config/runtime.exs`.
 config :albert_airline, AlbertAirline.Mailer, adapter: Swoosh.Adapters.Local
 
+# Configure error tracking. :dsn is unset here — set only in
+# config/runtime.exs for :prod, since Sentry only reports events when
+# :dsn is configured. client uses Finch (already a transitive dep via
+# Req/Swoosh) instead of adding :hackney as a second HTTP client library.
+config :sentry,
+  client: AlbertAirline.SentryFinchHTTPClient,
+  enable_source_code_context: true,
+  root_source_code_paths: [File.cwd!()]
+
 # Configure esbuild (the version is required)
 config :esbuild,
   version: "0.25.4",
