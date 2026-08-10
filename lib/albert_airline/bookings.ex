@@ -223,21 +223,36 @@ defmodule AlbertAirline.Bookings do
     user = Accounts.get_user!(user_id)
     flight = Repo.preload(flight, [:departure_airport, :arrival_airport])
     bookings = Repo.preload(bookings, :seat)
-    BookingNotifier.deliver_booking_confirmation(user, flight, bookings)
-    :ok
-  rescue
-    error ->
-      Logger.error(
-        "Failed to send booking confirmation email for user #{user_id}: #{inspect(error)}"
-      )
 
-      :ok
+    case BookingNotifier.deliver_booking_confirmation(user, flight, bookings) do
+      {:ok, _email} -> :ok
+      {:error, reason} -> log_email_failure("booking confirmation for user #{user_id}", reason)
+    end
+  rescue
+    error -> log_email_failure("booking confirmation for user #{user_id}", error)
+  end
+
+  defp log_email_failure(context, reason) do
+    Logger.error("Failed to send email (#{context}): #{inspect(reason)}")
+    :ok
   end
 
   defp refund_and_report_conflict(session) do
-    if session.payment_intent, do: Payments.refund(session.payment_intent)
+    if session.payment_intent, do: refund_lost_checkout(session.payment_intent)
     {:error, :seat_conflict}
   end
+
+  defp refund_lost_checkout(payment_intent) do
+    case Payments.refund(payment_intent) do
+      {:ok, _result} -> :ok
+      {:error, reason} -> log_refund_failure(lost_checkout_context(payment_intent), reason)
+    end
+  rescue
+    error -> log_refund_failure(lost_checkout_context(payment_intent), error)
+  end
+
+  defp lost_checkout_context(payment_intent),
+    do: "lost seat-conflict checkout (payment_intent #{payment_intent})"
 
   defp generate_confirmation_code do
     :crypto.strong_rand_bytes(6) |> Base.encode32(case: :upper, padding: false)
@@ -329,33 +344,27 @@ defmodule AlbertAirline.Bookings do
 
   defp maybe_refund_cancelled_booking(%Booking{} = booking) do
     case Payments.refund(booking.stripe_payment_intent_id, booking.total_price) do
-      {:ok, _result} ->
-        :ok
-
-      {:error, reason} ->
-        log_refund_failure(booking, reason)
+      {:ok, _result} -> :ok
+      {:error, reason} -> log_refund_failure(cancelled_booking_context(booking), reason)
     end
   rescue
-    error -> log_refund_failure(booking, error)
+    error -> log_refund_failure(cancelled_booking_context(booking), error)
   end
 
-  defp log_refund_failure(booking, reason) do
-    Logger.error(
-      "Refund failed for booking #{booking.id} (payment_intent #{booking.stripe_payment_intent_id}): #{inspect(reason)}"
-    )
+  defp cancelled_booking_context(booking),
+    do: "booking #{booking.id} (payment_intent #{booking.stripe_payment_intent_id})"
 
+  defp log_refund_failure(context, reason) do
+    Logger.error("Refund failed for #{context}: #{inspect(reason)}")
     :ok
   end
 
   defp send_cancellation_email(%Booking{} = booking) do
-    BookingNotifier.deliver_booking_cancellation(booking)
-    :ok
+    case BookingNotifier.deliver_booking_cancellation(booking) do
+      {:ok, _email} -> :ok
+      {:error, reason} -> log_email_failure("cancellation for booking #{booking.id}", reason)
+    end
   rescue
-    error ->
-      Logger.error(
-        "Failed to send cancellation email for booking #{booking.id}: #{inspect(error)}"
-      )
-
-      :ok
+    error -> log_email_failure("cancellation for booking #{booking.id}", error)
   end
 end
