@@ -22,6 +22,9 @@ defmodule AlbertAirlineWeb.Router do
 
     get "/", PageController, :home
     get "/about", PageController, :about
+    get "/terms", PageController, :terms
+    get "/privacy", PageController, :privacy
+    get "/refund-policy", PageController, :refund_policy
     get "/bookings/cancelled", BookingController, :cancelled
   end
 
