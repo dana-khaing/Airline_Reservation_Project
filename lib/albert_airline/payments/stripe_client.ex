@@ -17,12 +17,6 @@ defmodule AlbertAirline.Payments.StripeClient do
 
   @impl true
   def create_checkout_session(params) do
-    cents =
-      params.amount
-      |> Decimal.mult(Decimal.new(100))
-      |> Decimal.round(0)
-      |> Decimal.to_integer()
-
     body =
       %{
         "mode" => "payment",
@@ -30,7 +24,7 @@ defmodule AlbertAirline.Payments.StripeClient do
         "cancel_url" => params.cancel_url,
         "line_items[0][quantity]" => "1",
         "line_items[0][price_data][currency]" => "usd",
-        "line_items[0][price_data][unit_amount]" => to_string(cents),
+        "line_items[0][price_data][unit_amount]" => to_string(to_cents(params.amount)),
         "line_items[0][price_data][product_data][name]" => params.description
       }
       |> Map.merge(metadata_params(params.metadata))
@@ -54,10 +48,24 @@ defmodule AlbertAirline.Payments.StripeClient do
   end
 
   @impl true
-  def refund(payment_intent_id) do
+  def refund(payment_intent_id, amount) do
+    body =
+      %{"payment_intent" => payment_intent_id}
+      |> maybe_put_amount(amount)
+
     "#{@base_url}/refunds"
-    |> Req.post(form: %{"payment_intent" => payment_intent_id}, auth: {:bearer, secret_key()})
+    |> Req.post(form: body, auth: {:bearer, secret_key()})
     |> handle_response(& &1)
+  end
+
+  defp maybe_put_amount(body, nil), do: body
+  defp maybe_put_amount(body, amount), do: Map.put(body, "amount", to_string(to_cents(amount)))
+
+  defp to_cents(amount) do
+    amount
+    |> Decimal.mult(Decimal.new(100))
+    |> Decimal.round(0)
+    |> Decimal.to_integer()
   end
 
   defp handle_response({:ok, %{status: status, body: body}}, transform) when status in 200..299,

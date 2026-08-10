@@ -9,6 +9,7 @@ defmodule AlbertAirline.Bookings.Booking do
     field :total_price, :decimal
     field :confirmation_code, :string
     field :booked_at, :utc_datetime
+    field :stripe_payment_intent_id, :string
 
     belongs_to :seat, AlbertAirline.Flights.Seat
     belongs_to :flight, AlbertAirline.Flights.Flight
@@ -25,6 +26,7 @@ defmodule AlbertAirline.Bookings.Booking do
       :total_price,
       :confirmation_code,
       :booked_at,
+      :stripe_payment_intent_id,
       :seat_id,
       :flight_id,
       :user_id

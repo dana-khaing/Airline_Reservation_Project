@@ -11,8 +11,12 @@ defmodule AlbertAirline.Payments do
   @doc "Looks up a checkout session's payment status and metadata."
   def retrieve_checkout_session(session_id), do: adapter().retrieve_checkout_session(session_id)
 
-  @doc "Refunds a completed payment by its payment intent id."
-  def refund(payment_intent_id), do: adapter().refund(payment_intent_id)
+  @doc """
+  Refunds a completed payment by its payment intent id. Pass `amount` for a
+  partial refund (e.g. cancelling one seat out of a multi-seat order);
+  omit it to refund the full original payment.
+  """
+  def refund(payment_intent_id, amount \\ nil), do: adapter().refund(payment_intent_id, amount)
 
   defp adapter,
     do:
