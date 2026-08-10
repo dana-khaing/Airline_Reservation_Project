@@ -65,6 +65,26 @@ defmodule AlbertAirlineWeb.ContactLive.NewTest do
     assert message.user_id == user.id
   end
 
+  test "ignores a spoofed user_id from an unauthenticated visitor", %{conn: conn} do
+    victim = user_fixture()
+    {:ok, lv, _html} = live(conn, ~p"/contact")
+
+    # A real form submit can't carry a `user_id` field since none is
+    # rendered, so this bypasses `form/3` and sends the "save" event
+    # directly — the way a manipulated socket payload would.
+    render_submit(lv, "save", %{
+      "message" => %{
+        "first_name" => "Anon",
+        "last_name" => "Ymous",
+        "email" => "anon@example.com",
+        "user_id" => to_string(victim.id)
+      }
+    })
+
+    assert [message] = Contact.list_contact_messages()
+    assert message.user_id == nil
+  end
+
   test "shows inline validation errors and does not persist invalid data", %{conn: conn} do
     {:ok, lv, _html} = live(conn, ~p"/contact")
 

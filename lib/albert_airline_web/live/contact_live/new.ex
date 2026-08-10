@@ -23,9 +23,7 @@ defmodule AlbertAirlineWeb.ContactLive.New do
   def handle_event("save", %{"message" => params}, socket) do
     case RateLimit.check("contact:#{socket.assigns.client_ip}", :timer.minutes(1), 5) do
       :ok ->
-        params = maybe_attach_user(params, socket.assigns.current_scope)
-
-        case Contact.create_message(params) do
+        case Contact.create_message(params, current_user_id(socket.assigns.current_scope)) do
           {:ok, _message} ->
             {:noreply,
              socket
@@ -41,8 +39,8 @@ defmodule AlbertAirlineWeb.ContactLive.New do
     end
   end
 
-  defp maybe_attach_user(params, %{user: %{id: id}}), do: Map.put(params, "user_id", id)
-  defp maybe_attach_user(params, _no_scope), do: params
+  defp current_user_id(%{user: %{id: id}}), do: id
+  defp current_user_id(_no_scope), do: nil
 
   defp assign_form(socket, changeset) do
     assign(socket, :form, to_form(changeset, as: "message"))
