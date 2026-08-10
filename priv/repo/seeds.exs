@@ -13,6 +13,7 @@ import Ecto.Query
 
 alias AlbertAirline.Accounts
 alias AlbertAirline.Repo
+alias AlbertAirline.Flights
 alias AlbertAirline.Flights.{Airline, Airport, Flight, Seat}
 alias AlbertAirline.Bookings.Booking
 
@@ -32,9 +33,8 @@ Repo.update_all(from(u in AlbertAirline.Accounts.User, where: u.id == ^admin_use
   set: [is_admin: true]
 )
 
-seat_rows = 1..10
-seat_columns = ~w(A B C D E F G H I J)
-business_rows = [1, 2]
+%{rows: seat_rows, columns: seat_columns, business_rows: business_rows} =
+  Flights.seat_grid_layout()
 
 airports =
   Enum.map(
