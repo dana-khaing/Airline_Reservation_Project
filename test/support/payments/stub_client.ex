@@ -2,12 +2,16 @@ defmodule AlbertAirline.Payments.StubClient do
   @moduledoc """
   Test-only payment adapter: no network calls. Simulates a successful
   Stripe checkout by default; pass `metadata: %{"simulate_unpaid" => "true"}`
-  to a checkout call to simulate an abandoned/incomplete payment instead.
+  to a checkout call to simulate an abandoned/incomplete payment instead, or
+  `metadata: %{"simulate_refund_failure" => "true"}` to give the session a
+  payment_intent that this module's own `refund/2` always fails for.
   """
 
   @behaviour AlbertAirline.Payments.Adapter
 
   use Agent
+
+  @refund_failure_payment_intent "pi_test_simulate_refund_failure"
 
   def start_link(_opts),
     do: Agent.start_link(fn -> %{sessions: %{}, refunds: []} end, name: __MODULE__)
@@ -19,9 +23,16 @@ defmodule AlbertAirline.Payments.StubClient do
     payment_status =
       if Map.get(params.metadata, "simulate_unpaid") == "true", do: "unpaid", else: "paid"
 
+    payment_intent =
+      if Map.get(params.metadata, "simulate_refund_failure") == "true" do
+        @refund_failure_payment_intent
+      else
+        "pi_test_#{System.unique_integer([:positive])}"
+      end
+
     session = %{
       payment_status: payment_status,
-      payment_intent: "pi_test_#{System.unique_integer([:positive])}",
+      payment_intent: payment_intent,
       metadata: params.metadata
     }
 
@@ -48,7 +59,7 @@ defmodule AlbertAirline.Payments.StubClient do
       )
     end)
 
-    if payment_intent_id == "pi_test_simulate_refund_failure" do
+    if payment_intent_id == @refund_failure_payment_intent do
       {:error, :simulated_failure}
     else
       {:ok, %{"status" => "succeeded"}}
