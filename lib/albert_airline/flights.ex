@@ -263,6 +263,16 @@ defmodule AlbertAirline.Flights do
   @business_rows [1, 2]
 
   @doc """
+  The seat grid shape (row numbers, column letters, which rows are business
+  class) used both by create_flight_with_seats/1 and by the seed script,
+  which needs the same layout but finer control over individual seat
+  status than that function exposes.
+  """
+  def seat_grid_layout do
+    %{rows: @seat_rows, columns: @seat_columns, business_rows: @business_rows}
+  end
+
+  @doc """
   Creates a flight and generates its full 10x10 seat grid (rows 1-2
   business, rest economy) in one transaction — what the admin UI uses, so
   a newly created flight is immediately searchable and bookable instead of
