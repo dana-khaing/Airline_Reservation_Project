@@ -2,7 +2,25 @@ defmodule AlbertAirlineWeb.UserSessionController do
   use AlbertAirlineWeb, :controller
 
   alias AlbertAirline.Accounts
+  alias AlbertAirline.RateLimiter
   alias AlbertAirlineWeb.UserAuth
+
+  plug :rate_limit_create when action in [:create]
+
+  defp rate_limit_create(conn, _opts) do
+    key = "login:#{:inet.ntoa(conn.remote_ip)}"
+
+    case RateLimiter.check(key, :timer.minutes(1), 10) do
+      :ok ->
+        conn
+
+      {:error, :rate_limited} ->
+        conn
+        |> put_flash(:error, "Too many login attempts. Please wait a moment and try again.")
+        |> redirect(to: ~p"/users/log-in")
+        |> halt()
+    end
+  end
 
   def create(conn, %{"_action" => "confirmed"} = params) do
     create(conn, params, "User confirmed successfully.")

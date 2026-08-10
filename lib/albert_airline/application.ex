@@ -27,6 +27,7 @@ defmodule AlbertAirline.Application do
       AlbertAirline.Repo,
       {DNSCluster, query: Application.get_env(:albert_airline, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: AlbertAirline.PubSub},
+      {AlbertAirline.RateLimiter, clean_period: :timer.minutes(10)},
       # Start a worker by calling: AlbertAirline.Worker.start_link(arg)
       # {AlbertAirline.Worker, arg},
       # Start to serve requests, typically the last entry
