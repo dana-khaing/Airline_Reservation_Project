@@ -14,8 +14,10 @@ defmodule AlbertAirline.CancelBookingRefundTest do
 
   use AlbertAirline.DataCase, async: true
 
+  import Swoosh.TestAssertions
   import AlbertAirline.FlightsFixtures
   import AlbertAirline.BookingsFixtures
+  import AlbertAirline.AccountsFixtures
 
   alias AlbertAirline.Bookings
   alias AlbertAirline.Payments.StubClient
@@ -35,6 +37,19 @@ defmodule AlbertAirline.CancelBookingRefundTest do
     refunds = Enum.filter(StubClient.refunds(), &(&1.payment_intent_id == payment_intent_id))
     assert [%{amount: amount}] = refunds
     assert Decimal.equal?(amount, Decimal.new("150.00"))
+  end
+
+  test "cancelling a booking sends a cancellation email to the booking's owner" do
+    user = user_fixture()
+    booking = booking_fixture(%{user_id: user.id, confirmation_code: "CANCELMAIL1"})
+
+    # user_fixture/1 sends an account-confirmation email as a side effect —
+    # drop it so it can't be mistaken for the cancellation email below.
+    flush_emails()
+
+    assert {:ok, _cancelled} = Bookings.cancel_booking(booking)
+
+    assert_email_sent(to: user.email, subject: "Booking cancelled — CANCELMAIL1")
   end
 
   test "cancelling one seat out of a multi-seat order only refunds that seat's price" do
