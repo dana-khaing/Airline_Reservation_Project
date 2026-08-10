@@ -533,7 +533,7 @@ defmodule AlbertAirline.Flights do
   defp maybe_filter_stops(query, categories) do
     exact_values =
       categories
-      |> Enum.reject(&(&1 == "two_plus"))
+      |> Enum.filter(&(&1 in ["direct", "one_stop"]))
       |> Enum.map(&stops_for_category/1)
 
     include_two_plus? = "two_plus" in categories
