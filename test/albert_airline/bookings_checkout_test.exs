@@ -1,6 +1,8 @@
 defmodule AlbertAirline.BookingsCheckoutTest do
   use AlbertAirline.DataCase, async: true
 
+  import Swoosh.TestAssertions
+
   alias AlbertAirline.Bookings
   alias AlbertAirline.Flights
 
@@ -12,6 +14,10 @@ defmodule AlbertAirline.BookingsCheckoutTest do
     seat_a = seat_fixture(%{flight_id: flight.id, label: "1A"})
     seat_b = seat_fixture(%{flight_id: flight.id, label: "1B"})
     user = user_fixture()
+
+    # user_fixture/1 sends an account-confirmation email as a side effect —
+    # drop it so it can't be mistaken for a booking-confirmation email below.
+    flush_emails()
 
     %{flight: flight, seat_a: seat_a, seat_b: seat_b, user: user}
   end
@@ -67,13 +73,16 @@ defmodule AlbertAirline.BookingsCheckoutTest do
 
       assert Flights.get_seat!(seat_a.id).status == "booked"
       assert Flights.get_seat!(seat_b.id).status == "booked"
+
+      assert_email_sent(subject: "Your booking is confirmed — #{hd(bookings).confirmation_code}")
     end
 
-    test "is idempotent — confirming the same session twice doesn't double-book or error", %{
-      flight: flight,
-      seat_a: seat_a,
-      user: user
-    } do
+    test "is idempotent — confirming the same session twice doesn't double-book, error, or re-send the confirmation email",
+         %{
+           flight: flight,
+           seat_a: seat_a,
+           user: user
+         } do
       {:ok, %{id: session_id}} =
         Bookings.start_checkout(
           user,
@@ -87,6 +96,10 @@ defmodule AlbertAirline.BookingsCheckoutTest do
       assert {:ok, [^booking]} = Bookings.confirm_from_stripe_session(session_id)
 
       assert length(Bookings.list_bookings_by_confirmation_code(booking.confirmation_code)) == 1
+
+      subject = "Your booking is confirmed — #{booking.confirmation_code}"
+      assert_email_sent(subject: subject)
+      refute_email_sent(subject: ^subject)
     end
 
     test "refunds and reports a conflict if a seat was claimed by someone else during checkout",
