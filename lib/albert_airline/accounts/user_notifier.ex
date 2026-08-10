@@ -1,21 +1,9 @@
 defmodule AlbertAirline.Accounts.UserNotifier do
-  import Swoosh.Email
-
   alias AlbertAirline.Mailer
   alias AlbertAirline.Accounts.User
 
-  # Delivers the email using the application mailer.
   defp deliver(recipient, subject, body) do
-    email =
-      new()
-      |> to(recipient)
-      |> from({"AlbertAirline", "contact@example.com"})
-      |> subject(subject)
-      |> text_body(body)
-
-    with {:ok, _metadata} <- Mailer.deliver(email) do
-      {:ok, email}
-    end
+    Mailer.deliver_text_email({"Albert Airline", "contact@example.com"}, recipient, subject, body)
   end
 
   @doc """

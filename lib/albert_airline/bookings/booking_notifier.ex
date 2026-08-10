@@ -1,19 +1,13 @@
 defmodule AlbertAirline.Bookings.BookingNotifier do
-  import Swoosh.Email
-
   alias AlbertAirline.Mailer
 
   defp deliver(recipient, subject, body) do
-    email =
-      new()
-      |> to(recipient)
-      |> from({"Albert Airline", "bookings@example.com"})
-      |> subject(subject)
-      |> text_body(body)
-
-    with {:ok, _metadata} <- Mailer.deliver(email) do
-      {:ok, email}
-    end
+    Mailer.deliver_text_email(
+      {"Albert Airline", "bookings@example.com"},
+      recipient,
+      subject,
+      body
+    )
   end
 
   @doc """
