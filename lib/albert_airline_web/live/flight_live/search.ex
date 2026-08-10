@@ -2,6 +2,7 @@ defmodule AlbertAirlineWeb.FlightLive.Search do
   use AlbertAirlineWeb, :live_view
 
   alias AlbertAirline.Flights
+  alias AlbertAirlineWeb.FlightLive.Helpers
 
   @stop_categories [
     {"direct", "Direct"},
@@ -164,7 +165,7 @@ defmodule AlbertAirlineWeb.FlightLive.Search do
                 )} ({flight.arrival_airport.iata_code})
               </div>
               <div class="text-sm text-black/70">
-                {stops_label(flight.stops)} · {flight.airline.name} · {@seat_counts[flight.id]} seats left
+                {Helpers.stops_label(flight.stops)} · {flight.airline.name} · {@seat_counts[flight.id]} seats left
               </div>
             </div>
             <div class="text-lg font-bold">${flight.base_price}</div>
@@ -174,8 +175,4 @@ defmodule AlbertAirlineWeb.FlightLive.Search do
     </Layouts.app>
     """
   end
-
-  defp stops_label(0), do: "Direct"
-  defp stops_label(1), do: "1 Connection"
-  defp stops_label(n), do: "#{n} Connections"
 end
