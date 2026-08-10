@@ -8,9 +8,9 @@ defmodule AlbertAirlineWeb.AdminLive.Dashboard do
     {:ok,
      socket
      |> assign(:page_title, "Admin")
-     |> assign(:airport_count, length(Flights.list_airports()))
-     |> assign(:airline_count, length(Flights.list_airlines()))
-     |> assign(:flight_count, length(Flights.list_flights()))}
+     |> assign(:airport_count, Flights.count_airports())
+     |> assign(:airline_count, Flights.count_airlines())
+     |> assign(:flight_count, Flights.count_flights())}
   end
 
   @impl true
