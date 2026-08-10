@@ -3,6 +3,7 @@ defmodule AlbertAirlineWeb.UserLive.Registration do
 
   alias AlbertAirline.Accounts
   alias AlbertAirline.Accounts.User
+  alias AlbertAirlineWeb.RateLimit
 
   @impl true
   def render(assigns) do
@@ -51,11 +52,28 @@ defmodule AlbertAirlineWeb.UserLive.Registration do
   def mount(_params, _session, socket) do
     changeset = Accounts.change_user_email(%User{}, %{}, validate_unique: false)
 
-    {:ok, assign_form(socket, changeset), temporary_assigns: [form: nil]}
+    {:ok, socket |> RateLimit.assign_client_ip() |> assign_form(changeset),
+     temporary_assigns: [form: nil]}
   end
 
   @impl true
   def handle_event("save", %{"user" => user_params}, socket) do
+    case RateLimit.check("register:#{socket.assigns.client_ip}", :timer.minutes(1), 5) do
+      :ok ->
+        do_save(socket, user_params)
+
+      {:error, :rate_limited} ->
+        {:noreply,
+         put_flash(socket, :error, "Too many requests. Please wait a moment and try again.")}
+    end
+  end
+
+  def handle_event("validate", %{"user" => user_params}, socket) do
+    changeset = Accounts.change_user_email(%User{}, user_params, validate_unique: false)
+    {:noreply, assign_form(socket, Map.put(changeset, :action, :validate))}
+  end
+
+  defp do_save(socket, user_params) do
     case Accounts.register_user(user_params) do
       {:ok, user} ->
         {:ok, _} =
@@ -75,11 +93,6 @@ defmodule AlbertAirlineWeb.UserLive.Registration do
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign_form(socket, changeset)}
     end
-  end
-
-  def handle_event("validate", %{"user" => user_params}, socket) do
-    changeset = Accounts.change_user_email(%User{}, user_params, validate_unique: false)
-    {:noreply, assign_form(socket, Map.put(changeset, :action, :validate))}
   end
 
   defp assign_form(socket, %Ecto.Changeset{} = changeset) do
