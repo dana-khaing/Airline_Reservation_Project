@@ -71,7 +71,7 @@ defmodule AlbertAirlineWeb.BookingLive.Confirmation do
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash} current_scope={@current_scope}>
-      <div class="albert-card mx-auto max-w-2xl text-center">
+      <div class="card mx-auto max-w-2xl text-center">
         <.confirmed
           :if={@status == :confirmed}
           bookings={@bookings}
@@ -85,12 +85,9 @@ defmodule AlbertAirlineWeb.BookingLive.Confirmation do
             checking out. Your payment has been refunded in full — no charge will
             appear on your card. Please search again and pick another seat.
           </p>
-          <.link
-            navigate={~p"/search"}
-            class="mt-4 inline-block rounded-lg bg-[#2563eb] px-4 py-2 font-semibold text-white"
-          >
+          <.button navigate={~p"/search"} variant="primary" class="mt-4">
             Back to search
-          </.link>
+          </.button>
         </div>
 
         <div :if={@status == :payment_incomplete}>

@@ -51,17 +51,17 @@ defmodule AlbertAirlineWeb.BookingLive.Show do
     ~H"""
     <Layouts.app flash={@flash} current_scope={@current_scope}>
       <div class="mx-auto max-w-2xl">
-        <div class="albert-card">
+        <div class="card">
           <h2 class="text-2xl font-bold">
             {@booking.flight.departure_airport.iata_code} → {@booking.flight.arrival_airport.iata_code}
           </h2>
-          <p class="mt-2 text-sm text-black/70">
+          <p class="mt-2 text-sm text-(--text-muted)">
             {@booking.flight.airline.name} · Flight {@booking.flight.flight_number} · Seat {@booking.seat.label}
           </p>
-          <p class="mt-1 text-sm text-black/70">
+          <p class="mt-1 text-sm text-(--text-muted)">
             {Calendar.strftime(@booking.flight.departure_time, "%B %d, %Y %H:%M")}
           </p>
-          <p class="mt-1 text-sm text-black/70">
+          <p class="mt-1 text-sm text-(--text-muted)">
             Confirmation: <span class="font-mono">{@booking.confirmation_code}</span>
           </p>
         </div>

@@ -69,7 +69,7 @@ defmodule AlbertAirlineWeb.FlightLive.Search do
     <Layouts.app flash={@flash} current_scope={@current_scope}>
       <div class="mx-auto max-w-5xl">
         <h2 class="mb-4 text-2xl font-bold">Flight Search</h2>
-        <div class="albert-card mb-6">
+        <div class="card mb-6">
           <form id="search-form" phx-change="filter">
             <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5 lg:items-end">
               <.input
@@ -103,12 +103,9 @@ defmodule AlbertAirlineWeb.FlightLive.Search do
                 placeholder="1"
                 value={@criteria.seats}
               />
-              <button
-                type="submit"
-                class="btn rounded-lg bg-[#2563eb] px-6 py-2 font-semibold text-white"
-              >
+              <.button type="submit" variant="primary">
                 Search Your Flight
-              </button>
+              </.button>
             </div>
 
             <div class="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2">
@@ -121,6 +118,7 @@ defmodule AlbertAirlineWeb.FlightLive.Search do
                       name="stops[]"
                       value={value}
                       checked={value in @criteria.stops}
+                      class="size-4 rounded border-(--border-default) text-brand-600 focus:ring-2 focus:ring-brand-500/40"
                     /> {label}
                   </label>
                 </div>
@@ -135,6 +133,7 @@ defmodule AlbertAirlineWeb.FlightLive.Search do
                       name="airline_ids[]"
                       value={airline.id}
                       checked={to_string(airline.id) in @criteria.airline_ids}
+                      class="size-4 rounded border-(--border-default) text-brand-600 focus:ring-2 focus:ring-brand-500/40"
                     /> {airline.name}
                   </label>
                 </div>
@@ -143,7 +142,7 @@ defmodule AlbertAirlineWeb.FlightLive.Search do
           </form>
         </div>
 
-        <div :if={@flights == []} class="albert-card text-center">
+        <div :if={@flights == []} class="card text-center">
           No flights match your search. Try different filters.
         </div>
 
@@ -151,7 +150,7 @@ defmodule AlbertAirlineWeb.FlightLive.Search do
           <.link
             :for={flight <- @flights}
             navigate={~p"/flights/#{flight.id}"}
-            class="albert-card flex flex-col gap-2 hover:opacity-90 sm:flex-row sm:items-center sm:justify-between"
+            class="card flex flex-col gap-2 hover:bg-(--surface-muted) sm:flex-row sm:items-center sm:justify-between"
           >
             <div>
               <div class="font-semibold">
@@ -160,7 +159,7 @@ defmodule AlbertAirlineWeb.FlightLive.Search do
                   "%H:%M"
                 )} ({flight.arrival_airport.iata_code})
               </div>
-              <div class="text-sm text-black/70">
+              <div class="text-sm text-(--text-muted)">
                 {Helpers.stops_label(flight.stops)} · {flight.airline.name} · {@seat_counts[flight.id]} seats left
               </div>
             </div>

@@ -1,8 +1,8 @@
 defmodule AlbertAirlineWeb.FlightStatusComponents do
   @moduledoc """
   Renders a live Aviationstack flight-status lookup (see
-  `AlbertAirline.FlightStatus`) as a small `.albert-card` panel: loading,
-  found (status badge + delay + gate), not-found ("no live match" — the
+  `AlbertAirline.FlightStatus`) as a small `.card` panel: loading, found
+  (status badge + delay + gate), not-found ("no live match" — the
   expected outcome for this app's mostly-fictional demo flight numbers),
   or error.
   """
@@ -18,14 +18,14 @@ defmodule AlbertAirlineWeb.FlightStatusComponents do
       |> assign(:found, found_status(assigns.status))
 
     ~H"""
-    <div class={["albert-card", @class]}>
+    <div class={["card", @class]}>
       <h4 class="font-semibold">Live flight status</h4>
 
-      <p :if={@state == :loading} class="mt-2 text-sm text-black/60">
+      <p :if={@state == :loading} class="mt-2 text-sm text-(--text-muted)">
         Checking live status…
       </p>
 
-      <p :if={@state in [:not_found, :error]} class="mt-2 text-sm text-black/60">
+      <p :if={@state in [:not_found, :error]} class="mt-2 text-sm text-(--text-muted)">
         Live tracking unavailable for this flight.
       </p>
 
@@ -57,10 +57,18 @@ defmodule AlbertAirlineWeb.FlightStatusComponents do
   defp found_status(%{ok?: true, result: {:ok, status}}), do: status
   defp found_status(_async_result), do: nil
 
-  defp status_badge_class("landed"), do: "bg-green-100 text-green-800"
-  defp status_badge_class("active"), do: "bg-blue-100 text-blue-800"
-  defp status_badge_class("scheduled"), do: "bg-gray-100 text-gray-800"
-  defp status_badge_class("cancelled"), do: "bg-red-100 text-red-800"
-  defp status_badge_class("diverted"), do: "bg-yellow-100 text-yellow-800"
-  defp status_badge_class(_status), do: "bg-gray-100 text-gray-800"
+  defp status_badge_class("landed"),
+    do: "bg-success-100 text-success-800 dark:bg-success-800/20 dark:text-success-100"
+
+  defp status_badge_class("active"),
+    do: "bg-info-100 text-info-800 dark:bg-info-800/20 dark:text-info-100"
+
+  defp status_badge_class("cancelled"),
+    do: "bg-error-100 text-error-800 dark:bg-error-800/20 dark:text-error-100"
+
+  defp status_badge_class("diverted"),
+    do: "bg-warning-100 text-warning-800 dark:bg-warning-800/20 dark:text-warning-100"
+
+  defp status_badge_class(_status),
+    do: "bg-(--surface-muted) text-(--text-muted)"
 end

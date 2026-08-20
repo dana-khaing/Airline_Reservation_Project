@@ -52,13 +52,13 @@ defmodule AlbertAirlineWeb.AccountLive.Bookings do
         <h2 class="text-2xl font-bold">My Bookings</h2>
 
         <h3 class="mt-6 text-xl font-semibold">Upcoming</h3>
-        <p :if={@upcoming == []} class="albert-card mt-2">No upcoming bookings.</p>
+        <p :if={@upcoming == []} class="card mt-2">No upcoming bookings.</p>
         <div class="mt-2 flex flex-col gap-3">
           <.booking_card :for={booking <- @upcoming} booking={booking} cancellable={true} />
         </div>
 
         <h3 class="mt-8 text-xl font-semibold">Past &amp; Cancelled</h3>
-        <p :if={@past == []} class="albert-card mt-2">Nothing here yet.</p>
+        <p :if={@past == []} class="card mt-2">Nothing here yet.</p>
         <div class="mt-2 flex flex-col gap-3">
           <.booking_card :for={booking <- @past} booking={booking} cancellable={false} />
         </div>
@@ -72,38 +72,41 @@ defmodule AlbertAirlineWeb.AccountLive.Bookings do
 
   defp booking_card(assigns) do
     ~H"""
-    <div class="albert-card flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+    <div class="card flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
       <div>
         <div class="font-semibold">
           {@booking.flight.departure_airport.iata_code} → {@booking.flight.arrival_airport.iata_code}
-          <span class="ml-2 text-sm font-normal text-black/60">({status_label(@booking.status)})</span>
+          <span class="ml-2 text-sm font-normal text-(--text-muted)">
+            ({status_label(@booking.status)})
+          </span>
         </div>
-        <div class="text-sm text-black/70">
+        <div class="text-sm text-(--text-muted)">
           {@booking.flight.airline.name} · Flight {@booking.flight.flight_number} · Seat {@booking.seat.label}
         </div>
-        <div class="text-sm text-black/70">
+        <div class="text-sm text-(--text-muted)">
           {Calendar.strftime(@booking.flight.departure_time, "%B %d, %Y %H:%M")}
         </div>
-        <div class="text-sm text-black/70">
+        <div class="text-sm text-(--text-muted)">
           Confirmation: <span class="font-mono">{@booking.confirmation_code}</span>
         </div>
         <.link
           navigate={~p"/bookings/#{@booking.id}"}
-          class="mt-2 inline-block text-sm font-semibold text-[#2563eb] hover:underline"
+          class="mt-2 inline-block text-sm font-semibold text-brand-600 hover:underline dark:text-brand-400"
         >
           {if @cancellable, do: "Track flight status →", else: "View booking →"}
         </.link>
       </div>
-      <button
+      <.button
         :if={@cancellable}
         type="button"
         phx-click="cancel"
         phx-value-id={@booking.id}
         data-confirm="Cancel this booking? The seat will be released."
-        class="self-start rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:opacity-90 sm:self-center"
+        variant="danger"
+        class="self-start sm:self-center"
       >
         Cancel
-      </button>
+      </.button>
     </div>
     """
   end

@@ -135,9 +135,14 @@ defmodule AlbertAirlineWeb.FlightLive.Show do
 
   defp seat_class(seat, selected_seat_ids) do
     cond do
-      MapSet.member?(selected_seat_ids, seat.id) -> "bg-[#2563eb] text-white border-[#2563eb]"
-      seat.status != "available" -> "bg-gray-300 text-gray-700 line-through cursor-not-allowed"
-      true -> "bg-white text-black border-black/40 hover:bg-[#2563eb]/20"
+      MapSet.member?(selected_seat_ids, seat.id) ->
+        "border-brand-600 bg-brand-600 text-white"
+
+      seat.status != "available" ->
+        "cursor-not-allowed border-(--border-default) bg-(--surface-sunken) text-(--text-muted) line-through"
+
+      true ->
+        "border-(--border-default) bg-(--surface) text-(--text-default) hover:bg-brand-50 dark:hover:bg-brand-950"
     end
   end
 
@@ -153,7 +158,7 @@ defmodule AlbertAirlineWeb.FlightLive.Show do
   def render(assigns) do
     ~H"""
     <Layouts.app flash={@flash} current_scope={@current_scope}>
-      <div class="albert-card mx-auto max-w-3xl">
+      <div class="card mx-auto max-w-3xl">
         <h2 class="text-2xl font-bold">
           {Calendar.strftime(@flight.departure_time, "%H:%M")} - {Calendar.strftime(
             @flight.arrival_time,
@@ -176,7 +181,7 @@ defmodule AlbertAirlineWeb.FlightLive.Show do
         </p>
 
         <h4 class="mt-6 font-semibold">Choose the seat for the trip :</h4>
-        <p class="mt-1 text-sm text-black/60">
+        <p class="mt-1 text-sm text-(--text-muted)">
           Available seats are white, selected seats are blue, unavailable seats are struck through and gray.
         </p>
         <div class="mt-3 overflow-x-auto">
@@ -222,22 +227,23 @@ defmodule AlbertAirlineWeb.FlightLive.Show do
           )}
         </h4>
         <div class="mt-4">
-          <button
+          <.button
             type="button"
             phx-click="book"
             disabled={MapSet.size(@selected_seat_ids) == 0}
-            class="rounded-lg bg-[#2563eb] px-6 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-40"
+            variant="primary"
+            class="px-6 py-3"
           >
             Book the flight
-          </button>
+          </.button>
           <p
             :if={is_nil(@current_scope) and MapSet.size(@selected_seat_ids) > 0}
-            class="mt-2 text-sm text-black/60"
+            class="mt-2 text-sm text-(--text-muted)"
           >
             You'll be asked to log in before payment.
           </p>
         </div>
-        <p class="mt-2 text-sm text-black/60">
+        <p class="mt-2 text-sm text-(--text-muted)">
           ** Baggage fees reflect the airline's standard fees based on the selected fare class. **
         </p>
       </div>
