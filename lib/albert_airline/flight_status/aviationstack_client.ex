@@ -31,9 +31,14 @@ defmodule AlbertAirline.FlightStatus.AviationstackClient do
   @impl true
   def get_status(flight_iata, date) do
     @base_url
-    |> Req.get(params: [access_key: api_key(), flight_iata: flight_iata])
+    |> Req.get([params: [access_key: api_key(), flight_iata: flight_iata]] ++ req_options())
     |> handle_response(date)
   end
+
+  # Empty (a no-op) outside test — lets tests substitute a Req.Test plug
+  # without adding any indirection to the real dev/prod request path.
+  defp req_options,
+    do: Application.get_env(:albert_airline, :aviationstack_client_req_options, [])
 
   defp handle_response({:ok, %{status: status, body: %{"error" => error}}}, _date)
        when status in 200..299,
