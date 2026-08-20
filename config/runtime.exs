@@ -33,6 +33,12 @@ config :albert_airline, :stripe_secret_key, System.get_env("STRIPE_SECRET_KEY")
 # all today — nothing in the booking flow calls this yet (GO_LIVE.md item 1).
 config :albert_airline, :duffel_api_key, System.get_env("DUFFEL_API_KEY")
 
+# A free-tier Aviationstack API key, needed for real live flight-status
+# lookups via AlbertAirline.FlightStatus.AviationstackClient. Not required
+# in :test, which uses a stub adapter, nor to run the app at all — the
+# status panel just degrades to "Live tracking unavailable" without it.
+config :albert_airline, :aviationstack_api_key, System.get_env("AVIATIONSTACK_API_KEY")
+
 if config_env() == :dev do
   # Reload browser tabs when matching files change.
   config :albert_airline, AlbertAirlineWeb.Endpoint,
